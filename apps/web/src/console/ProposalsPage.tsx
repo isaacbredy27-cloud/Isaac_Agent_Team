@@ -3,15 +3,10 @@ import { Link } from "react-router-dom";
 import type { Proposal } from "@schemas";
 import { Card, EmptyState, Spinner } from "../design/components";
 import { ConsoleApiError, describeError, useConsoleApi } from "./api";
+import { consoleCopy } from "./copy";
 
-export const STATUS_LABEL: Record<Proposal["status"], string> = {
-  pending: "Pending review",
-  approved: "Approved, committing",
-  rejected: "Rejected",
-  committed: "Committed",
-  failed: "Commit failed",
-  stale: "Stale: main changed",
-};
+const c = consoleCopy;
+export const STATUS_LABEL: Record<Proposal["status"], string> = c.proposal.status;
 
 export function ProposalsPage() {
   const api = useConsoleApi();
@@ -29,14 +24,14 @@ export function ProposalsPage() {
   return (
     <main className="page stack-lg">
       <div className="row-between">
-        <h1>Proposals</h1>
-        <Link className="button button--ghost" to="/agents">Agents</Link>
+        <h1>{c.agents.proposalsHeading}</h1>
+        <Link className="button button--ghost" to="/agents">{c.agents.title}</Link>
       </div>
-      {err ? <EmptyState title="Could not load proposals" description={describeError(err)} /> : null}
-      {!err && !items ? <Spinner label="Loading proposals" /> : null}
-      {items && items.length === 0 ? <EmptyState title="No proposals yet" description="Ask an agent for a change in chat." /> : null}
+      {err ? <EmptyState title={c.proposal.loadErrorTitle} description={describeError(err)} /> : null}
+      {!err && !items ? <Spinner label={c.proposal.loading} /> : null}
+      {items && items.length === 0 ? <EmptyState title={c.agents.proposalsEmpty} /> : null}
       {items && items.length > 0 ? (
-        <ul className="stack" style={{ listStyle: "none", padding: 0, margin: 0 }}>
+        <ul className="stack">
           {items.map((p) => (
             <li key={p.id}>
               <Card className="stack">
@@ -44,7 +39,7 @@ export function ProposalsPage() {
                   <h2 className="text-sm">#{p.id} {p.title}</h2>
                 </Link>
                 <p className="text-xs text-secondary">
-                  {p.agent} · {p.files.length} file{p.files.length === 1 ? "" : "s"} · <span className="badge">{STATUS_LABEL[p.status]}</span>
+                  {p.agent} · {c.proposal.fileCount(p.files.length)} · <span className="badge">{STATUS_LABEL[p.status]}</span>
                 </p>
               </Card>
             </li>

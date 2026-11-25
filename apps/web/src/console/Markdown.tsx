@@ -23,7 +23,7 @@ export function Markdown({ text }: { text: string }) {
   return (
     <div className="stack">
       {parts.map((part, pi) => {
-        if (pi % 2 === 1) return <pre key={pi} className="mono text-sm" style={{ overflowX: "auto" }}><code>{part}</code></pre>;
+        if (pi % 2 === 1) return <pre key={pi} className="mono text-sm scroll-x"><code>{part}</code></pre>;
         return part
           .split(/\n{2,}/)
           .filter((b) => b.trim())
@@ -33,7 +33,7 @@ export function Markdown({ text }: { text: string }) {
             if (lines.every((l) => /^\s*[-*] /.test(l))) {
               return <ul key={key}>{lines.map((l, li) => <li key={li}>{inline(l.replace(/^\s*[-*] /, ""), `${key}-${li}`)}</li>)}</ul>;
             }
-            return <p key={key} style={{ whiteSpace: "pre-wrap" }}>{inline(block, key)}</p>;
+            return <p key={key} className="pre-wrap">{inline(block, key)}</p>;
           });
       })}
     </div>

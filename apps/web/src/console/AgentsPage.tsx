@@ -54,7 +54,7 @@ export function AgentsPage() {
         groups.map(([group, list]) => (
           <section key={group} className="stack" aria-labelledby={`g-${group}`}>
             <h2 id={`g-${group}`}>{cap(group)}</h2>
-            <ul className="stack" style={{ listStyle: "none", padding: 0, margin: 0 }}>
+            <ul className="stack">
               {list.map((a) => (
                 <li key={a.name}>
                   <Card className="stack">

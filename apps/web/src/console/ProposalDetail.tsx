@@ -5,8 +5,11 @@ import type { ApproveResponse, Proposal } from "@schemas";
 import { StepUpSheet } from "../auth";
 import { Button, Card, EmptyState, Spinner } from "../design/components";
 import { ConsoleApiError, describeError, useConsoleApi } from "./api";
+import { consoleCopy } from "./copy";
 import { DiffView } from "./DiffView";
 import { STATUS_LABEL } from "./ProposalsPage";
+
+const c = consoleCopy.proposal;
 
 export function ProposalDetail() {
   const { id = "" } = useParams();
@@ -18,8 +21,13 @@ export function ProposalDetail() {
   const [msg, setMsg] = useState<string | null>(null);
   const [done, setDone] = useState<ApproveResponse | null>(null);
   const [stepUp, setStepUp] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState("");
   const approveRef = useRef<HTMLButtonElement>(null);
+  const rejectRef = useRef<HTMLButtonElement>(null);
   const confirmId = useId();
+  const helpId = useId();
+  const reasonId = useId();
 
   useEffect(() => {
     const ac = new AbortController();
@@ -39,8 +47,10 @@ export function ProposalDetail() {
         setDone(res);
         setP({ ...p, status: "committed", commitSha: res.commitSha });
       } else {
-        await api.reject(p.id);
+        await api.reject(p.id, reason.trim() || undefined);
+        setRejecting(false);
         setP({ ...p, status: "rejected" });
+        setMsg(c.rejected);
       }
     } catch (e) {
       const code = e instanceof ConsoleApiError ? e.code : "generic";
@@ -52,51 +62,72 @@ export function ProposalDetail() {
     }
   }
 
-  if (loadErr) return <main className="page"><EmptyState title="Proposal" description={describeError(loadErr)} /></main>;
-  if (!p) return <main className="page"><Spinner label="Loading proposal" /></main>;
+  if (loadErr) return <main className="page"><EmptyState title={c.pageTitle} description={describeError(loadErr)} /></main>;
+  if (!p) return <main className="page"><Spinner label={c.loading} /></main>;
   const pending = p.status === "pending";
 
   return (
     <main className="page stack-lg">
-      <Link className="button button--ghost" to="/agents/proposals">All proposals</Link>
+      <Link className="button button--ghost" to="/agents/proposals">{c.allProposals}</Link>
       <Card className="stack">
         <h1>#{p.id} {p.title}</h1>
         <p className="text-sm">
-          From <strong>{p.agent}</strong> · <span className="badge">{STATUS_LABEL[p.status]}</span>
+          {c.from(p.agent)} · <span className="badge">{STATUS_LABEL[p.status]}</span>
         </p>
-        <p style={{ whiteSpace: "pre-wrap" }}>{p.rationale}</p>
-        <p className="text-xs text-secondary mono">Base {p.baseSha.slice(0, 7)} · {new Date(p.createdAt).toLocaleString()}</p>
+        <h2 className="text-sm">{c.rationale}</h2>
+        <p className="pre-wrap">{p.rationale}</p>
+        <h2 className="text-sm">{c.files}</h2>
         <ul className="text-sm">
-          {p.files.map((f) => <li key={f.path}><span className="mono">{f.path}</span> ({f.action})</li>)}
+          {p.files.map((f) => (
+            <li key={f.path}>
+              <span className="mono">{f.path}</span>
+              {f.action === "create" ? ` (${c.newFile})` : f.action === "delete" ? ` (${c.removed})` : null}
+            </li>
+          ))}
         </ul>
       </Card>
       <Card><DiffView diff={p.diff} /></Card>
 
       {pending ? (
         <Card className="stack">
-          <h2>Review</h2>
-          <p className="text-sm">Approving commits this change directly to main and starts a production deploy.</p>
-          <label htmlFor={confirmId}>Type the proposal number ({p.id}) to approve</label>
-          <input id={confirmId} inputMode="numeric" autoComplete="off" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+          <h2>{c.reviewHeading}</h2>
+          <p className="text-sm">{c.approveHint}</p>
+          <label htmlFor={confirmId}>{c.confirmLabel(p.id)}</label>
+          <input id={confirmId} aria-describedby={helpId} inputMode="numeric" autoComplete="off" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+          <p id={helpId} className="text-xs text-secondary">{c.confirmHelp}</p>
           <div className="row">
-            <button ref={approveRef} type="button" className="button button--primary" disabled={busy || confirm.trim() !== p.id} onClick={() => run("approve")}>
-              {busy ? "Working" : "Approve and commit"}
-            </button>
-            <Button variant="danger" disabled={busy} onClick={() => run("reject")}>Reject</Button>
+            <Button variant="primary" ref={approveRef} disabled={busy || confirm.trim() !== p.id} onClick={() => run("approve")}>
+              {busy && !rejecting ? c.working : c.approveButton}
+            </Button>
+            {!rejecting ? (
+              <Button variant="danger" ref={rejectRef} disabled={busy} onClick={() => setRejecting(true)}>{c.reject}</Button>
+            ) : null}
           </div>
+          {rejecting ? (
+            <section className="stack" aria-labelledby={`${reasonId}-t`}>
+              <h3 id={`${reasonId}-t`}>{c.rejectTitle}</h3>
+              <label htmlFor={reasonId}>{c.rejectReasonLabel}</label>
+              <textarea id={reasonId} rows={3} maxLength={2000} value={reason} onChange={(e) => setReason(e.target.value)} autoFocus />
+              <div className="row">
+                <Button variant="danger" disabled={busy} onClick={() => run("reject")}>{busy ? c.working : c.rejectConfirm}</Button>
+                <Button variant="secondary" disabled={busy} onClick={() => { setRejecting(false); setReason(""); }}>{c.cancel}</Button>
+              </div>
+            </section>
+          ) : null}
         </Card>
       ) : null}
 
       {msg ? <p role="alert">{msg}</p> : null}
       {done ? (
         <p role="status">
-          Committed <a href={done.commitUrl} rel="noreferrer" target="_blank" className="mono">{done.commitSha.slice(0, 7)}</a>. Netlify is deploying it now.
+          {c.deployed}{" "}
+          <a href={done.commitUrl} rel="noreferrer" target="_blank">{c.viewCommit}</a>
         </p>
       ) : null}
 
       <StepUpSheet
         open={stepUp}
-        onDone={() => { setStepUp(false); setMsg("Verified. Press Approve again."); approveRef.current?.focus(); }}
+        onDone={() => { setStepUp(false); setMsg(c.stepUpDone); approveRef.current?.focus(); }}
         onCancel={() => { setStepUp(false); approveRef.current?.focus(); }}
       />
     </main>

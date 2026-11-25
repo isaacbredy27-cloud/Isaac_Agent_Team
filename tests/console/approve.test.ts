@@ -5,6 +5,9 @@ import { resetBlobs } from "./blobs-mock";
 import approve from "../../netlify/functions/proposals-approve";
 import { saveNewProposal, getProposal } from "../../netlify/functions/_lib/console/proposals";
 import { commitMessage } from "../../netlify/functions/_lib/console/github";
+import { hashSub } from "../../netlify/functions/_lib/console/audit";
+import reject from "../../netlify/functions/proposals-reject";
+import { getStore } from "./blobs-mock";
 
 const BASE = "a".repeat(40);
 const NEW = "c".repeat(40);
@@ -88,7 +91,12 @@ describe("POST /api/proposals/:id/approve", () => {
     expect(calls).toEqual(["GET /git/ref/heads/main", `GET /git/commits/${BASE}`, "POST /git/blobs", "POST /git/trees", "POST /git/commits", "PATCH /git/refs/heads/main"]);
     expect(lastCommitBody.parents).toEqual([BASE]);
     expect(lastCommitBody.message).toBe(commitMessage({ agent: "orchestrator", title: "Update plan", id: p.id, approverSub: SUPER }));
-    expect(lastCommitBody.message).toContain(`Approved-by: ${SUPER}`);
+    expect(lastCommitBody.message).toContain(`Approved-by: ${hashSub(SUPER)}`);
+    expect(lastCommitBody.message).not.toContain(SUPER);
+    const audit = getStore("audit");
+    const events = await Promise.all((await audit.list()).blobs.map((b) => audit.get(b.key)));
+    expect(events).toContainEqual(expect.objectContaining({ action: "approve", result: "approved", details: { stepUpAt: expect.any(Number) } }));
+    expect(JSON.stringify(events)).not.toContain(SUPER);
     expect((await getProposal(p.id))?.proposal).toMatchObject({ status: "committed", reviewer: SUPER, commitSha: NEW });
   });
 
@@ -134,6 +142,32 @@ describe("POST /api/proposals/:id/approve", () => {
     // Stub auth is off outside dev/test, so a Deploy Preview rejects the stub token outright.
     expect([401, 503]).toContain((await call(p.id)).status);
     expect(calls).toEqual([]);
+  });
+
+  it("blocks secrets in content at approve time (422 content_blocked)", async () => {
+    const p = await seed();
+    const store = getStore("proposals");
+    const key = `p/${p.id.padStart(8, "0")}`;
+    const raw = (await store.get(key)) as { files: Array<{ after?: string }> };
+    raw.files[0]!.after = "token=github_pat_ABCDEFGHIJKLMNOPQRSTUVWX";
+    await store.setJSON(key, raw);
+    const res = await call(p.id);
+    expect(res.status).toBe(422);
+    expect(await res.json()).toEqual({ error: "content_blocked" });
+    expect(calls).toEqual([]);
+  });
+
+  it("reject requires a matching Origin", async () => {
+    const p = await seed();
+    const req = (origin?: string) =>
+      reject(new Request(`${ORIGIN}/api/proposals/${p.id}/reject`, {
+        method: "POST",
+        headers: { authorization: `Bearer stub.super_admin.aal2.${now()}`, ...(origin ? { origin } : {}) },
+        body: "{}",
+      }), { params: { id: p.id } } as never);
+    expect(await (await req()).json()).toEqual({ error: "bad_origin" });
+    expect(await (await req("https://evil.test")).json()).toEqual({ error: "bad_origin" });
+    expect(await (await req(ORIGIN)).json()).toEqual({ status: "rejected" });
   });
 
   it("cannot approve twice", async () => {

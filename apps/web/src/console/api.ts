@@ -12,6 +12,7 @@ import {
 } from "@schemas";
 import { z } from "zod";
 import { useAuth } from "../auth";
+import { consoleCopy } from "./copy";
 
 export class ConsoleApiError extends Error {
   constructor(readonly code: string, readonly status: number) {
@@ -26,27 +27,30 @@ const ConsoleAgentSchema = AgentSummarySchema.extend({
   tools: z.array(z.string()),
 });
 
-/** Human text for every error code the console Functions return. */
+/** Plain text for every error code the console Functions return. Never names a role, "main" or "commit". */
 export const errorText: Record<string, string> = {
-  unauthorized: "Your session ended. Sign in again.",
-  forbidden: "This page is not available.",
-  mfa_required: "Finish two-step verification to use the console.",
-  step_up_required: "Confirm with your authenticator code, then press Approve again.",
+  unauthorized: consoleCopy.chat.sessionEnded,
+  forbidden: "This page isn't available.",
+  mfa_required: "Finish two-step verification to continue.",
+  step_up_required: "Enter your authenticator code, then press Approve again.",
   bad_origin: "Request blocked. Reload the page and try again.",
-  confirm_mismatch: "The number you typed does not match this proposal.",
-  base_sha_changed: "Main changed since this proposal was made. Ask the agent to redo it.",
-  not_configured: "This environment cannot do that. Approve works only on production.",
-  path_denied: "A file in this proposal is no longer allowed.",
-  invalid_state: "This proposal is no longer pending.",
-  commit_failed: "The commit failed. Nothing changed on main. Try again later.",
-  rate_limited: "Too many requests. Wait a minute and try again.",
+  confirm_mismatch: "The number you typed doesn't match this proposal.",
+  base_sha_changed: consoleCopy.proposal.baseChanged,
+  path_denied: consoleCopy.proposal.blockedPath,
+  content_blocked: "This proposal contains content that can't be saved. Ask the agent for a different change.",
+  invalid_state: consoleCopy.proposal.alreadyDone,
+  conflict: consoleCopy.proposal.alreadyDone,
+  not_configured: "You can't do this here. Use the live app.",
+  commit_failed: consoleCopy.proposal.error,
+  rate_limited: consoleCopy.chat.rate,
+  budget_exceeded: "You've reached today's chat limit. Try again tomorrow.",
   refusal: "The agent declined this request.",
   max_tokens: "The reply was too long and stopped early.",
   time_limit: "The reply hit the time limit. Send a follow-up to continue.",
-  upstream_error: "The agent is unavailable. Try again.",
-  not_found: "Not found.",
+  upstream_error: consoleCopy.chat.error,
+  not_found: "We can't find that.",
 };
-export const describeError = (code: string): string => errorText[code] ?? "Something went wrong. Try again.";
+export const describeError = (code: string): string => errorText[code] ?? "Something went wrong. Try again in a moment.";
 
 async function readBody(res: Response): Promise<unknown> {
   const body: unknown = await res.json().catch(() => null);
@@ -114,8 +118,9 @@ export function useConsoleApi() {
     return ApproveResponseSchema.parse(await readBody(res));
   }, [authed]);
 
-  const reject = useCallback(async (id: string): Promise<void> => {
-    await readBody(await authed(`/api/proposals/${encodeURIComponent(id)}/reject`, { method: "POST", body: "{}" }));
+  const reject = useCallback(async (id: string, reason?: string): Promise<void> => {
+    const body = JSON.stringify(reason ? { reason: reason.slice(0, 2000) } : {});
+    await readBody(await authed(`/api/proposals/${encodeURIComponent(id)}/reject`, { method: "POST", body }));
   }, [authed]);
 
   /** Streams chat events to onEvent. Resolves when the stream ends. */

@@ -327,8 +327,8 @@ export const copy = {
     },
     notAvailable: {
       title: "This page isn't available",
-      body: "Go back to your matches.",
-      button: "Back to matches",
+      body: "Go back to your jobs.",
+      button: "Back to jobs",
       docTitle: "Page not available",
     },
     error: {
@@ -436,8 +436,8 @@ export const copy = {
     generic: "Something went wrong on our side. Try again in a moment.",
     network: "We can't reach the internet. Check your connection and try again.",
     notFoundTitle: "We can't find that page",
-    notFoundBody: "Go back to your matches.",
-    notFoundAction: "Back to matches",
+    notFoundBody: "Go back to your jobs.",
+    notFoundAction: "Back to jobs",
     rateLimit: "Too many tries. Wait a minute and try again.",
     unavailable: "This is taking longer than usual. Try again in a moment.",
   },

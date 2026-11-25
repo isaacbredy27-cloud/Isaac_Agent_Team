@@ -46,11 +46,11 @@ export function Chat({ agent }: { agent: ConsoleAgent }) {
 
   return (
     <section className="stack" aria-label={`Chat with ${agent.name}`}>
-      <ol className="stack" style={{ listStyle: "none", padding: 0, margin: 0 }} aria-live="polite" aria-busy={busy}>
+      <ol className="stack" aria-live="polite" aria-busy={busy}>
         {turns.map((t, i) => (
           <li key={i} className="card stack">
             <p className="text-xs text-secondary">{t.role === "user" ? "You" : agent.persona.replace(/\*/g, "").split(".")[0] || agent.name}</p>
-            {t.role === "user" ? <p style={{ whiteSpace: "pre-wrap" }}>{t.text}</p> : <Markdown text={t.text || (busy && i === turns.length - 1 ? "…" : "")} />}
+            {t.role === "user" ? <p className="pre-wrap">{t.text}</p> : <Markdown text={t.text || (busy && i === turns.length - 1 ? "…" : "")} />}
             {t.proposals.map((id) => (
               <Link key={id} className="chip chip--static" to={`/agents/proposals/${id}`}>
                 Review proposal #{id}

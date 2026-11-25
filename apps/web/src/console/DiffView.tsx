@@ -1,4 +1,7 @@
-// Unified diff with +/- markers AND text labels, so meaning never relies on colour (skill accessibility-wcag).
+// Unified diff. Sable's .diff classes draw the +/− signs (CSS ::before); visually hidden text labels
+// carry the meaning for screen readers, so colour is never the only cue (skill accessibility-wcag).
+import { consoleCopy } from "./copy";
+
 export type DiffLine = { kind: "add" | "del" | "ctx" | "meta"; text: string };
 
 export function parseDiff(diff: string): DiffLine[] {
@@ -13,29 +16,23 @@ export function parseDiff(diff: string): DiffLine[] {
     });
 }
 
-const LABEL = { add: "Added", del: "Removed", ctx: "Unchanged", meta: "" } as const;
-const SIGN = { add: "+", del: "−", ctx: " ", meta: "" } as const;
-const STYLE = {
-  add: { background: "var(--band-strong-bg)", color: "var(--band-strong-fg)" },
-  del: { background: "var(--band-weak-bg)", color: "var(--band-weak-fg)" },
-  ctx: {},
-  meta: { color: "var(--text-secondary)", fontWeight: 600 },
-} as const;
+const CLASS = { add: "diff-line diff-add", del: "diff-line diff-del", ctx: "diff-line", meta: "diff-line text-secondary" } as const;
+const LABEL = { add: consoleCopy.proposal.added, del: consoleCopy.proposal.removed } as const;
 
 export function DiffView({ diff }: { diff: string }) {
   const lines = parseDiff(diff);
   const added = lines.filter((l) => l.kind === "add").length;
   const removed = lines.filter((l) => l.kind === "del").length;
+  if (added + removed === 0) return <p>{consoleCopy.proposal.noChanges}</p>;
   return (
-    <section aria-label="Changes" className="stack">
+    <section aria-label={consoleCopy.proposal.diff} className="stack">
       <p className="text-sm">
         {added} lines added, {removed} lines removed
       </p>
-      <ol className="mono text-sm" style={{ listStyle: "none", padding: 0, margin: 0, overflowX: "auto" }}>
+      <ol className="diff">
         {lines.map((l, i) => (
-          <li key={i} style={{ ...STYLE[l.kind], whiteSpace: "pre", padding: "0 0.5rem" }}>
-            {l.kind !== "meta" ? <span aria-hidden="true">{SIGN[l.kind]} </span> : null}
-            {l.kind !== "meta" && l.kind !== "ctx" ? <span className="visually-hidden">{LABEL[l.kind]}: </span> : null}
+          <li key={i} className={CLASS[l.kind]}>
+            {l.kind === "add" || l.kind === "del" ? <span className="visually-hidden">{LABEL[l.kind]}: </span> : null}
             {l.text || " "}
           </li>
         ))}

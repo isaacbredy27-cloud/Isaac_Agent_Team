@@ -4,6 +4,7 @@ vi.mock("@netlify/blobs", () => import("./blobs-mock"));
 import { resetBlobs } from "./blobs-mock";
 import chat, { isFakeClaudeEnabled } from "../../netlify/functions/agents-chat";
 import { getProposal } from "../../netlify/functions/_lib/console/proposals";
+import { DAILY_TOKEN_BUDGET, addTokens, isOverBudget, usageTokens } from "../../netlify/functions/_lib/console/budget";
 
 const now = () => Math.floor(Date.now() / 1000);
 const post = (body: unknown, token = `stub.super_admin.aal2.${now()}`) =>
@@ -42,6 +43,16 @@ describe("POST /api/agents/chat", () => {
   it("emits not_configured without ANTHROPIC_API_KEY", async () => {
     const evs = await events(await post({ agent: "orchestrator", message: "hi" }));
     expect(evs).toEqual([{ type: "error", error: "not_configured" }, { type: "done" }]);
+  });
+
+  it("emits budget_exceeded once the daily 2M token budget is used", async () => {
+    vi.stubEnv("ANTHROPIC_API_KEY", "sk-ant-test");
+    const sub = "00000000-0000-4000-8000-0000000000a1";
+    expect(DAILY_TOKEN_BUDGET).toBe(2_000_000);
+    await addTokens(sub, usageTokens({ input_tokens: 1_999_000, output_tokens: 500, cache_read_input_tokens: 500 }));
+    expect(await isOverBudget(sub)).toBe(true);
+    const evs = await events(await post({ agent: "orchestrator", message: "hi" }));
+    expect(evs).toEqual([{ type: "error", error: "budget_exceeded" }, { type: "done" }]);
   });
 
   it("404 for an unknown agent; 403 forbidden for a user", async () => {
