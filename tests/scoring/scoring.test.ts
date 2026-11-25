@@ -94,7 +94,8 @@ describe("score", () => {
     expect(sub(2)).toBeCloseTo(0.5 ** 1.5);
     expect(sub(5)).toBe(1);
     expect(sub(9)).toBe(1);
-    expect(sub(10)).toBe(0.85);
+    expect(sub(10)).toBe(1); // no over-experience penalty (age proxy)
+    expect(sub(30)).toBe(1);
   });
 
   it("scores education levels", () => {
@@ -124,9 +125,9 @@ describe("score", () => {
     expect(t("Accounting Manager")).toBe(0.6);
     expect(t("Controller")).toBe(0.3);
     const low = scoreDetailed(profile({ titles: ["Controller"] }), job({ title: "Senior Accountant" }), tax);
-    expect(low.subScores.title.value).toBe(0.3);
+    expect(low.subScores.title.value).toBe(1); // overqualified is never penalised
     const minus1 = scoreDetailed(profile({ titles: ["Senior Accountant"] }), job({ title: "Staff Accountant" }), tax);
-    expect(minus1.subScores.title.value).toBe(0.7);
+    expect(minus1.subScores.title.value).toBe(1);
   });
 
   it("clearance gate caps at 69 and quotes the posting; clearance holder passes", () => {
@@ -138,6 +139,36 @@ describe("score", () => {
     expect(r.explanation).toContain("Posting requires");
     const ok = scoreDetailed(profile({ certifications: ["Secret Clearance"] }), j, tax);
     expect(ok.gates[0]?.passed).toBe(true);
+  });
+
+  it("clearance gate needs firm wording and quotes the posting", () => {
+    const ix = indexTaxonomy(tax);
+    const g = (description: string) => extractRequirements(job({ description }), ix).clearance;
+    expect(g("Must hold a current Secret clearance.")).toBe("Must hold a current Secret clearance.");
+    expect(g("Secret clearance preferred.")).toBeNull();
+    expect(g("Able to obtain a Secret clearance. Active clearance a plus.")).toBeNull();
+    expect(g("Candidates eligible for Secret clearance required.")).toBeNull();
+    expect(g("Employer will sponsor an active Secret clearance.")).toBeNull();
+    expect(g("No clearance needed.")).toBeNull();
+  });
+
+  it("failed soft gate with a low score is skip, not stretch", () => {
+    const j = job({ title: "x", skills: ["SQL", "GAAP", "Treasury"], description: "Active Secret clearance required. SQL, GAAP, Treasury required." });
+    const r = score(profile({ skills: ["Excel"] }), j, tax);
+    expect(r.score).toBeLessThan(45);
+    expect(r.recommendation.action).toBe("skip");
+  });
+
+  it("in-progress license failing the gate recommends stretch; missing one recommends skip", () => {
+    const j = job({ skills: ["Excel", "FP&A", "CPA"], description: "CPA required. Excel, FP&A required." });
+    const prog = score(profile({ certifications: ["CPA eligible"] }), j, tax);
+    expect(prog.score).toBeLessThanOrEqual(59);
+    expect(prog.score).toBeGreaterThanOrEqual(45);
+    expect(prog.recommendation.action).toBe("stretch");
+    expect(score(profile(), j, tax).recommendation.action).toBe("skip");
+    const low = score(profile({ skills: [], certifications: ["CPA eligible"] }), j, tax);
+    expect(low.score).toBeLessThan(45);
+    expect(low.recommendation.action).toBe("skip");
   });
 
   it("license and degree gates cap at 59 and recommend skip", () => {

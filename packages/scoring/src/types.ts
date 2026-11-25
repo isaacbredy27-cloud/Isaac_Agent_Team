@@ -1,7 +1,7 @@
 // Scoring contracts. Pure types; no I/O (CLAUDE.md: packages/scoring is pure).
 import type { Job, MatchResult } from "../../schemas/src/index.ts";
 
-export const WEIGHTS_VERSION = "D-1.0" as const;
+export const WEIGHTS_VERSION = "D-1.1" as const;
 
 export type Taxonomy = {
   version: number;
@@ -22,6 +22,8 @@ export type Gate = {
   /** Posting sentence that states the requirement (fairness-in-hiring: quote, never infer). */
   quote: string;
   passed: boolean;
+  /** License gate only: candidate lists the cert as in progress. */
+  inProgress?: boolean;
 };
 
 export type MissingItem = { id: string; label: string; kind: "skill" | "cert"; importance: Importance };

@@ -17,6 +17,8 @@ export type JobRequirements = {
 const PREFERRED = /\b(prefer(red)?|desired|nice to have|a plus|bonus|ideally)\b/i;
 const REQUIRED = /\b(required|requires|must|mandatory)\b/i;
 const EQUIV = /\b(or equivalent|equivalent (work )?experience|in lieu of)\b/i;
+const GATE_WORDING = /\b(active|current|must hold|required)\b/i;
+const SOFT_WORDING = /\b(obtain|eligible|sponsor)/i;
 const CLEARANCE = /\b(top secret|ts\/sci|secret|public trust)\b[^.;]{0,30}\bclearance\b|\bclearance\b[^.;]{0,20}\b(required|active)\b/i;
 
 export function sentences(text: string): string[] {
@@ -90,8 +92,8 @@ export function extractRequirements(job: Job, ix: TaxonomyIndex): JobRequirement
     }
   }
 
-  const cl = CLEARANCE.exec(job.description);
-  const clearance = cl ? (sents.find((s) => CLEARANCE.test(s)) ?? cl[0]) : null;
+  // Gate only on firm wording; "obtain / eligible / sponsor" wording is not a gate. Always quote the posting.
+  const clearance = sents.find((s) => CLEARANCE.test(s) && GATE_WORDING.test(s) && !SOFT_WORDING.test(s)) ?? null;
   return { skills, certs, years, education, seniority, clearance };
 }
 

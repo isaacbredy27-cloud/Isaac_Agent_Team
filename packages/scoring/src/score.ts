@@ -126,7 +126,7 @@ export function scoreDetailed(profile: CandidateProfile, job: Job, taxonomy: Tax
     const y = profile.yearsExperience;
     const { min, max } = req.years;
     if (y < min) experience = Math.max(0, 1 - (min - y) / min) ** 1.5;
-    else experience = y > max + 3 ? 0.85 : 1;
+    else experience = 1; // no over-experience penalty (age proxy; fairness review)
     const band = Number.isFinite(max) ? `${min}-${max}` : `${min}+`;
     evidence.push(`Experience: ${y} years vs ${band} years posted`);
   }
@@ -170,7 +170,7 @@ export function scoreDetailed(profile: CandidateProfile, job: Job, taxonomy: Tax
   let title: number | null = null;
   if (req.seniority !== null && cand.seniority !== null) {
     const g = req.seniority - cand.seniority;
-    title = g === 0 || g === 1 ? 1 : g === 2 ? 0.6 : g === -1 ? 0.7 : 0.3;
+    title = g <= 1 ? 1 : g === 2 ? 0.6 : 0.3; // seniority above the job is never penalised
     evidence.push(`Title level: job ${req.seniority}, candidate ${cand.seniority}`);
   }
 
@@ -195,7 +195,10 @@ export function scoreDetailed(profile: CandidateProfile, job: Job, taxonomy: Tax
   }
   for (const c of reqCerts) {
     if (LICENSES.has(c.id) && c.quote && isRequiredText(c.quote)) {
-      gates.push({ type: "license", cap: 59, quote: c.quote, passed: cand.certs.get(c.id) === 1 });
+      gates.push({
+        type: "license", cap: 59, quote: c.quote, passed: cand.certs.get(c.id) === 1,
+        inProgress: cand.certs.get(c.id) === 0.5,
+      });
     }
   }
   if (req.education && req.education.required && !req.education.equivalence && isRequiredText(req.education.quote)) {
@@ -225,10 +228,14 @@ export function score(profile: CandidateProfile, job: Job, taxonomy: Taxonomy): 
 
 function recommend(scoreValue: number, failed: Gate[], missing: MissingItem[]): MatchResult["recommendation"] {
   const missingRequired = missing.filter((m) => m.importance === "required").length;
-  if (failed.some((g) => g.cap <= 59)) {
+  const hard = failed.filter((g) => g.cap <= 59);
+  if (hard.length > 0 && scoreValue >= 45 && hard.every((g) => g.inProgress)) {
+    return { action: "stretch", text: "You are working toward a required license. Apply if you can finish it soon." };
+  }
+  if (hard.length > 0) {
     return { action: "skip", text: "A stated requirement is missing. Look for roles without it for now." };
   }
-  if (failed.length > 0) {
+  if (failed.length > 0 && scoreValue >= 45) {
     return { action: "stretch", text: "Strong overall, but a stated requirement is missing. Apply only if you can address it." };
   }
   if (scoreValue >= 80) return { action: "apply", text: "Apply now. Your resume fits this role closely." };
