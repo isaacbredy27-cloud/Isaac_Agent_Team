@@ -15,7 +15,7 @@ Do **not** scrape LinkedIn, Indeed or Glassdoor pages. Their terms prohibit auto
 ## 2. Collection pipeline
 
 ```
-Scheduled function (hourly, 30 s limit)
+Scheduled function (every 2 hours on the Free plan, ADR 0003; 30 s limit)
   └─ reads employer registry (Netlify Blobs: registry/employers.json)
   └─ POSTs one message per source to ingest-background (15 min limit)
         └─ fetch postings (ETag / If-Modified-Since where supported)
@@ -158,7 +158,7 @@ type NormalizedJob = {
 
 ## 7. Rate limits and politeness
 
-- One listing request per employer per hour. Stagger start times across the hour.
+- One listing request per employer per 2 hours (Free-plan credit budget, ADR 0003). Stagger start times.
 - Honour `Retry-After`, `429` and `503`. Back off exponentially. Stop for the run after three failures.
 - Send a descriptive User-Agent with a contact URL for the app. Do not include personal details.
 - Cache with ETag / Last-Modified where offered.

@@ -1,6 +1,6 @@
 # Netlify Architecture
 
-Research date: 2026-11-24. Goal: a secure, low-cost architecture with a static frontend and Netlify Functions.
+Research date: 2026-11-24. Updated 2026-11-25: runs on the **Netlify Free plan** ([ADR 0003](adr/0003-netlify-free-plan.md)) — 300 credits/month, and going over pauses every project on the account; code-based rate limits are available; env-var scopes, basic-auth headers and long log retention are not. Owner: `netlify-engineer`. Goal: a secure, low-cost architecture with a static frontend and Netlify Functions.
 
 ## 1. Platform facts that shape the design
 
@@ -24,7 +24,7 @@ Other facts:
 - Netlify Blobs: eventual consistency by default (updates reach all edges within 60 seconds); strong consistency is opt-in per store or per call. Objects up to 5 GB, metadata up to 2 KB, keys up to 600 bytes, list pages of 1,000. Encrypted at rest and in transit.
 - Site-wide stores (`getStore`) persist across deploys. Deploy stores (`getDeployStore`) are tied to one deploy.
 - Rate limits can be declared per function in `config.rateLimit` (`windowLimit`, `windowSize`, `aggregateBy: ["ip", "domain"]`). They cannot be set in `netlify.toml`.
-- Environment variables can be scoped to **Functions** only (Pro and Enterprise). Values may be up to 5,000 characters. Variables can be marked "Contains secret values". Changes appear in the team audit log.
+- Environment variables can be scoped to **Functions** only on Pro and Enterprise — **not on our Free plan**, so secrets are also visible to builds. Values may be up to 5,000 characters. Variables can be marked "Contains secret values". Changes appear in the team audit log.
 - The legacy Lambda-compatible streaming API documents a 10-second streaming limit. Use the modern `(req, context) => Response` API for streaming and verify the limit during the build spike (section 9).
 
 ## 2. Architecture diagram
@@ -147,7 +147,7 @@ Keep a storage interface (`JobRepo`, `ProfileRepo`) so the swap is local.
 1. Connect the GitHub repo to a Netlify site. Production branch: `main`.
 2. Every push to `main` builds and deploys production. Pull requests get Deploy Previews.
 3. Build command: `npm run build` → builds web app, generates `agents-manifest.json` from `.claude/agents/*.md`, type-checks functions.
-4. Set environment variables in the Netlify UI with **Functions** scope and "Contains secret values". Use different values for Production and Deploy Previews. Deploy Previews get a low-budget Claude key and **no** GitHub write token.
+4. Set environment variables in the Netlify UI marked "Contains secret values" (Free plan: no scopes). Use different values per deploy context. Deploy Previews get a low-budget Claude key and **no** GitHub write token (ADR 0001).
 5. Create a **build hook** only if continuous deployment is off. Build hooks accept `trigger_branch`, `trigger_title` and `clear_cache`. Store the hook URL as a secret.
 6. Node runtime: pin a version in `netlify.toml` / `package.json engines`. `unpdf` requires Node 24+; confirm Netlify's supported Node versions during the spike.
 
@@ -193,8 +193,8 @@ export const config: Config = {
 
 1. Streaming function response duration on the modern API (target: 60 s chat turns).
 2. Supported Node versions for functions (need 24+ for `unpdf`, or pin an older `unpdf`).
-3. Whether `rateLimit` is available on the chosen Netlify plan.
-4. Environment variable scopes require Pro; confirm plan.
+3. Resolved: code-based `rateLimit` is available on all plans, including Free.
+4. Resolved: Free plan chosen (ADR 0003); no env-var scopes, so secrets stay out of client code.
 5. Netlify Identity vs Auth0 extension (see `security.md`).
 
 ## 10. Scaling and cost

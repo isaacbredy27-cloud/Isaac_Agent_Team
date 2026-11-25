@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matches – Finance Match Orlando</title>
+<style>
+  body{font:16px/1.5 system-ui,sans-serif;margin:0;padding:16px;color:#111;background:#fff}
+  .chip{display:inline-flex;gap:6px;align-items:center;min-height:44px;padding:0 12px;border-radius:22px;border:1px solid #555;background:#fff;color:#111;font:inherit}
+  .chip[aria-pressed="true"]{background:#0B1F33;color:#fff}
+  .green{color:#1B7F3B}.amber{color:#8A5A00;background:#FFF4D6}.red{color:#B42318}
+  li{list-style:none;border:1px solid #ccc;border-radius:12px;padding:12px;margin:8px 0}
+</style></head>
+<body>
+<main>
+  <h1>Your matches</h1>
+  <div role="group" aria-label="Work arrangement">
+    <button class="chip" aria-pressed="false" data-f="remote">Remote</button>
+    <button class="chip" aria-pressed="false" data-f="hybrid">Hybrid</button>
+    <button class="chip" aria-pressed="false" data-f="onsite">On-site</button>
+  </div>
+  <p role="status" aria-live="polite" id="count"></p>
+  <ul id="list"></ul>
+</main>
+<script>
+  const jobs=[{t:"Senior Financial Analyst",s:86,a:"hybrid"},{t:"FP&A Analyst",s:74,a:"remote"},{t:"Credit Analyst",s:52,a:"onsite"}];
+  const label=s=>s>=80?["●","Strong Match","green"]:s>=60?["◐","Moderate Match","amber"]:["○","Weak Match","red"];
+  const active=new Set();
+  function render(){const shown=jobs.filter(j=>!active.size||active.has(j.a));
+    document.getElementById("list").innerHTML=shown.map(j=>{const[i,l,c]=label(j.s);return `<li><h2>${j.t}</h2><p class="${c}"><span aria-hidden="true">${i}</span> ${j.s}, ${l}</p></li>`}).join("");
+    document.getElementById("count").textContent=`${shown.length} job${shown.length===1?"":"s"} shown`;}
+  document.querySelectorAll(".chip").forEach(b=>b.addEventListener("click",()=>{const f=b.dataset.f;active.has(f)?active.delete(f):active.add(f);b.setAttribute("aria-pressed",active.has(f));render();}));
+  render();
+</script>
+</body></html>

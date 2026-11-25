@@ -1,6 +1,8 @@
 # Security
 
-Research date: 2026-11-24. Threat model, controls and acceptance criteria. This is engineering guidance, not legal advice.
+Research date: 2026-11-24. Updated 2026-11-25 for the decisions in [ADR 0001](adr/0001-github-fine-grained-pat-single-repo.md), [ADR 0002](adr/0002-commit-approved-changes-to-main.md), [ADR 0003](adr/0003-netlify-free-plan.md) and [ADR 0004](adr/0004-resume-confidentiality.md). Threat model, controls and acceptance criteria. This is engineering guidance, not legal advice.
+
+Owners: `security-expert` (skills `security-architecture`, `authentication`, `authorization`, `secrets-management`, `rate-limiting`, `prompt-injection-defense`, `audit-logging`) and `privacy-compliance-specialist` (skill `privacy-and-data-protection`).
 
 ## 1. Assets and threats
 
@@ -49,17 +51,19 @@ Enforce in a single `requireRole(req, role)` helper. Deny by default.
 
 ## 3. Secrets
 
-- Secrets live only in Netlify environment variables, **Functions** scope, marked "Contains secret values". Changes land in Netlify's team audit log.
+- Secrets live only in Netlify environment variables, marked "Contains secret values". Changes land in Netlify's team audit log.
+- **Free plan (ADR 0003):** variable *scopes* are a Pro feature, so secrets are also visible to the build step. Never reference a secret in client code; read secrets only inside function handlers.
 - Different values per deploy context. Deploy Previews get no `GITHUB_TOKEN` and a low-limit Claude key.
 - Never prefix secrets with `VITE_` or any client-exposed prefix. CI fails the build if `dist/` contains `sk-ant-`, `github_pat_`, `ghp_`, or `-----BEGIN`.
 - Rotation: every 90 days, and at once after any suspected leak. Keep a runbook.
 
 ## 4. GitHub fine-grained token
 
-- Resource owner: the repo owner. **Repository access: Only select repositories → this one repo.**
+- Decision: **ADR 0001**. Resource owner: the repo owner. **Repository access: Only select repositories → this one repo.**
 - Permissions: **Contents: Read and write**. Metadata: read (granted automatically). Nothing else. Do **not** grant Workflows, Actions, Administration, Secrets or Pull requests unless a later feature needs it.
 - Expiration: 90 days (GitHub allows 1–366 days or none; set one). Calendar the renewal.
-- Branch protection on `main`: block force-push and deletion. Consider requiring signed commits or a pull-request flow in phase 2 (`agent-console.md` §6.5).
+- Value set for the **Production** deploy context only; Deploy Previews have no GitHub token.
+- Approved proposals commit **directly to `main`** (ADR 0002). Branch protection on `main`: block force-push and deletion; do **not** require pull requests (that would block the token's commits).
 - Rate limits: 5,000 requests/hour; secondary limits of 80 content-creating requests/minute and 500/hour. Honour `retry-after` and `x-ratelimit-reset`.
 
 ## 5. Agent file-path allow-list
@@ -121,6 +125,8 @@ Log: sign-in, role change, resume upload/delete, profile export, agent chat star
 
 ## 9. Uploaded resume handling
 
+**ADR 0004: uploaded resumes must never be exposed publicly and are used only for candidate-job matching workflows.** No public URLs, no CDN or service-worker caching, no logs, no admin or agent access, no use in tests, analytics or training.
+
 - Validate type by magic bytes. Max 5 MB, 10 pages.
 - Parse in memory. Do not write the raw file to disk.
 - Default: **discard the raw file after parsing.** Keep only the structured profile.
@@ -148,7 +154,7 @@ Log: sign-in, role change, resume upload/delete, profile export, agent chat star
 | Proposals | Indefinitely (they explain repo history) |
 | Audit logs | 1 year |
 
-- "Delete my data" button removes profile, matches, saved jobs and kept files at once. Log the deletion (without content).
+- "Delete my data" button removes profile, matches, saved jobs and kept files at once. Log the deletion (without content). Worked example: `knowledge/privacy-compliance-specialist/examples/delete-my-data.mjs`.
 - A daily scheduled function enforces retention.
 - Breach response: Florida's Information Protection Act (s. 501.171, F.S.) sets notice duties for breaches of personal information. Have counsel confirm scope and timelines before launch.
 

@@ -1,0 +1,10 @@
+{
+  "upload.cta": "Upload your resume to see your matches.",
+  "upload.privacy": "We delete your file after reading it. You can delete your profile at any time.",
+  "upload.error.size": "This file is over 5 MB. Save it as a smaller PDF and try again.",
+  "upload.error.type": "We can read PDF and Word (.docx) files. Save your resume in one of those formats.",
+  "matches.empty.filters": "No jobs match these filters. Try removing one.",
+  "matches.offline": "You're offline. These results are from your last visit.",
+  "detail.weak.gate": "This role needs a Series 7 license. You can start with the SIE exam.",
+  "salary.estimate": "Typical Orlando range, based on government wage data. Not from this posting."
+}

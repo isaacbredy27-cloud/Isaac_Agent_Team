@@ -1,0 +1,48 @@
+{
+  "_fixture": {
+    "source": "https://api.lever.co/v0/postings/leverdemo?mode=json&limit=3",
+    "captured": "2026-11-25",
+    "note": "Real response from Lever's public demo board, trimmed to 2 postings; long text fields shortened."
+  },
+  "postings": [
+    {
+      "id": "ad208490-4052-4f91-a57e-433f2d1e484b",
+      "text": "Customer Success Manager",
+      "categories": {
+        "commitment": "Regular Full Time (Salary)",
+        "department": "Customer Success",
+        "location": "Atlanta, Georgia",
+        "team": "Customer Success Team",
+        "allLocations": ["Atlanta, Georgia"]
+      },
+      "country": "US",
+      "createdAt": 1788199939703,
+      "workplaceType": "hybrid",
+      "salaryRange": { "min": 85000, "max": 175000, "currency": "USD", "interval": "per-year-salary" },
+      "descriptionPlain": "Join a scaling, tight-knit team that's working directly with innovative talent acquisition teams...",
+      "lists": [
+        { "text": "Skill Set:", "content": "\n3+ years of customer relationship or account management experience working in software as a service (SaaS)\nSolutions and results-oriented mindset\nHighly organized with strong project management and time management skills\n" }
+      ],
+      "hostedUrl": "https://jobs.lever.co/leverdemo/ad208490-4052-4f91-a57e-433f2d1e484b",
+      "applyUrl": "https://jobs.lever.co/leverdemo/ad208490-4052-4f91-a57e-433f2d1e484b/apply"
+    },
+    {
+      "id": "1dbf02a6-d434-4e47-8d66-3aba2c17bed1",
+      "text": "Director of Diversity, Equity, and Inclusion",
+      "categories": {
+        "commitment": "Regular Full Time (Salary)",
+        "department": "Executive",
+        "location": "London, UK",
+        "team": "Executive",
+        "allLocations": ["London, UK"]
+      },
+      "country": "GB",
+      "createdAt": 1718633877107,
+      "workplaceType": "onsite",
+      "descriptionPlain": "",
+      "lists": [],
+      "hostedUrl": "https://jobs.lever.co/leverdemo/1dbf02a6-d434-4e47-8d66-3aba2c17bed1",
+      "applyUrl": "https://jobs.lever.co/leverdemo/1dbf02a6-d434-4e47-8d66-3aba2c17bed1/apply"
+    }
+  ]
+}

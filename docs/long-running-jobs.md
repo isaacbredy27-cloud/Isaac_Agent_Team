@@ -132,7 +132,7 @@ export default async () => {
   }
 };
 
-export const config: Config = { schedule: "@hourly" };
+export const config: Config = { schedule: "0 */2 * * *" }; // every 2 hours: Free-plan credit budget (ADR 0003)
 ```
 
 - The scheduled function must finish in 30 s. It only enqueues and fires.

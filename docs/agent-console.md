@@ -1,6 +1,6 @@
 # Agent Console
 
-Research date: 2026-11-24. Goal: an in-app console that lists the agents in `.claude/agents`, lets admins chat with them, and lets agents **propose** code changes that a human approves before anything is committed or deployed.
+Research date: 2026-11-24. Updated 2026-11-25: approved changes commit **directly to `main`** ([ADR 0002](adr/0002-commit-approved-changes-to-main.md)) using a fine-grained PAT for this repo only ([ADR 0001](adr/0001-github-fine-grained-pat-single-repo.md)). Owner: `agent-console-engineer` (skill `agent-console`). Goal: an in-app console that lists the agents in `.claude/agents`, lets admins chat with them, and lets agents **propose** code changes that a human approves before anything is committed or deployed.
 
 ## 1. Requirements recap
 
@@ -33,7 +33,7 @@ You are the scoring engineer for Finance Match Orlando...
 - `personality`, `responsibilities`: app-specific fields. Claude Code ignores unknown keys, but verify that during build.
 - `responsibilities` doubles as the agent's **path allow-list** for proposals (section 6).
 
-The repo has no `.claude/agents/` folder yet. Create it in the first build task. Suggested starter agents: `product-lead`, `frontend-engineer`, `functions-engineer`, `scoring-engineer`, `data-sources-engineer`, `qa-accessibility`, `security-reviewer`.
+Implemented: 17 agents in `.claude/agents/` (see `docs/expert-roster.md` §14). Claude Code ignores unknown frontmatter fields, so console metadata (personality, responsibilities, persona, status) lives in a `yaml console-profile` block in each agent body, which the manifest builder parses.
 
 ## 3. How the app reads agents
 
@@ -189,7 +189,7 @@ Token permissions: **Contents: read and write** on the one repository. Workflow 
 - Default: Netlify continuous deployment builds on every push to `main`. The commit itself triggers the deploy.
 - Alternative: if auto-publishing is locked, call the build hook URL (secret env var) with `trigger_title=Proposal%20%23<id>`.
 - Poll Netlify deploy status (Netlify API, read-only token) and show "Deploying… / Live / Failed" on the proposal.
-- Safer variant (recommended for phase 2): commit to a branch `agent/<id>`, let Netlify build a branch deploy for preview, then approve a second time to fast-forward `main`.
+- Decided (ADR 0002): commit directly to `main`. The branch-preview variant was considered and not adopted; revisit only through a new ADR.
 
 ### 6.6 Rollback
 

@@ -1,0 +1,15 @@
+{
+  "name": "finmatch-knowledge-examples",
+  "private": true,
+  "type": "module",
+  "description": "Dependencies for the runnable worked examples in knowledge/<agent>/examples. Playwright comes from the environment.",
+  "scripts": {
+    "examples": "node run-examples.mjs"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "^1.14.0",
+    "@axe-core/playwright": "^4.11.0",
+    "mammoth": "^1.11.0",
+    "unpdf": "^1.4.0"
+  }
+}

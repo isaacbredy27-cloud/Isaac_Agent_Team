@@ -1,6 +1,6 @@
 # Finance Match Orlando — Research Index
 
-Research date: 2026-11-24. Status: research complete; ready for build hand-off.
+Research date: 2026-11-24. Updated 2026-11-25. Status: research complete; decisions recorded in [adr/](adr/README.md); agent team implemented in `.claude/` (see [expert-roster.md](expert-roster.md) §14 and the root `CLAUDE.md`).
 
 Finance Match Orlando is an installable web app (PWA) on Netlify. Users upload a resume. The app collects recent Orlando-area finance jobs, scores each one against the resume, and explains the score.
 
@@ -19,20 +19,22 @@ Finance Match Orlando is an installable web app (PWA) on Netlify. Users upload a
 | 9 | [security.md](security.md) | Auth, roles, secrets, allow-lists, injection, retention |
 | 10 | [long-running-jobs.md](long-running-jobs.md) | Background work, queue, retries, progress |
 | 11 | [testing-and-accessibility.md](testing-and-accessibility.md) | Test plan, WCAG 2.2 AA, performance budgets |
-| 12 | [expert-roster.md](expert-roster.md) | The 17-agent team: roles, skills matrix, RACI, escalation, agent lifecycle and standards |
+| 12 | [expert-roster.md](expert-roster.md) | The 17-agent team: roles, skills matrix, RACI, escalation, agent lifecycle, standards, final architecture |
+| 13 | [adr/](adr/README.md) | Binding architecture decisions (ADRs 0001–0005) |
 
 ## Architecture decisions
 
 1. **Static PWA + Netlify Functions.** No separate server. (`netlify-architecture.md`)
 2. **Netlify Blobs for storage in phase 1**, behind repository interfaces so a database can replace it later.
-3. **Claude only server-side.** API key in Netlify env vars, Functions scope, marked secret.
+3. **Claude only server-side.** API key in Netlify env vars marked secret (Free plan: no scopes, so never referenced in client code — ADR 0003).
 4. **Code scores; Claude extracts and explains.** Scores are deterministic and versioned. (`match-scoring.md`)
 5. **Weighting model D:** gated, with seniority alignment and role-family presets.
 6. **Job data from official APIs first** (Greenhouse, Lever, SmartRecruiters, Ashby, USAJOBS), then public JSON-LD on career pages. No LinkedIn/Indeed/Glassdoor scraping.
 7. **Scheduled → background fan-out** for ingestion. Blob-backed task queue with leases and checkpoints. (`long-running-jobs.md`)
-8. **Agent changes need human approval.** Fine-grained GitHub token, one repo, Contents write only. Path allow-list. Atomic commit via Git Data API. Netlify redeploys on push. (`agent-console.md`)
+8. **Agent changes need human approval, then commit directly to `main`.** Fine-grained GitHub token, one repo, Contents write only. Path allow-list. Atomic commit via Git Data API. Netlify redeploys on push. (`agent-console.md`, ADR 0001, ADR 0002)
 9. **MFA for admins.** Auth0 extension recommended for admin accounts. (`security.md`)
 10. **PWA first; Capacitor later** only if store presence or native features become requirements. (`pwa-requirements.md`)
+11. **Netlify Free plan** until limits are exceeded (ADR 0003). **Resumes never public, matching only** (ADR 0004).
 
 ## Key numbers
 
@@ -88,14 +90,22 @@ Suggested agents (create in `.claude/agents/`): `product-lead`, `frontend-engine
 - Retention jobs, delete-my-data, monitoring and alerts.
 - Real-device testing; LLM eval sets; outcome logging for weight calibration.
 
+## Decisions made (2026-11-25)
+
+| Decision | Record |
+|---|---|
+| Fine-grained GitHub PAT restricted to this one repository (Contents read/write) | [ADR 0001](adr/0001-github-fine-grained-pat-single-repo.md) |
+| Approved changes commit directly to `main` | [ADR 0002](adr/0002-commit-approved-changes-to-main.md) |
+| Deploy and operate on the Netlify Free plan unless limits are exceeded | [ADR 0003](adr/0003-netlify-free-plan.md) |
+| Resumes are never public and are used only for matching | [ADR 0004](adr/0004-resume-confidentiality.md) |
+| Orchestrator hub, skills-first agents, per-agent knowledge | [ADR 0005](adr/0005-agent-ecosystem.md) |
+
 ## Open decisions for the owner
 
-1. **Auth provider:** Auth0 (MFA) for admins only, or for all users?
+1. **Auth provider:** Auth0 (MFA) for admins only, or for all users? (MFA for admins is required either way.)
 2. **Model cost lever:** keep `claude-opus-5-5` (default) for extraction, or approve an eval to test `claude-haiku-5-5`?
-3. **Netlify plan:** env var scopes need Pro or above; confirm rate-limit availability.
-4. **Commit target:** commit approved changes straight to `main` (simple) or to `agent/*` branches with a preview step (safer)?
-5. **Aggregator licence:** pay for a licensed jobs feed for Workday/Oracle employers, or rely on JSON-LD pages?
-6. **Push notifications:** phase 2 or later?
+3. **Aggregator licence:** pay for a licensed jobs feed for Workday/Oracle employers, or rely on JSON-LD pages?
+4. **Push notifications:** phase 2 or later?
 
 ## Research method and limits
 
