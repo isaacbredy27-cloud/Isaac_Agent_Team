@@ -9,7 +9,7 @@ This is the organizational blueprint for the expert agents that design, build, t
 1. [How the team works](#1-how-the-team-works)
 2. [Team overview](#2-team-overview)
 3. [Evaluation of optional roles](#3-evaluation-of-optional-roles)
-4. [Agent profiles](#4-agent-profiles) (17 agents)
+4. [Agent profiles](#4-agent-profiles) (18 agents)
 5. [Shared-skills matrix](#5-shared-skills-matrix)
 6. [Agent interaction diagram](#6-agent-interaction-diagram)
 7. [Responsibility matrix (RACI)](#7-responsibility-matrix-raci)
@@ -47,7 +47,7 @@ The Console context denies `netlify/functions/**`, `netlify.toml`, `package*.jso
 
 ### 1.3 Models
 
-- Each agent's model is chosen by job difficulty and cost of mistakes: see `docs/agent-brains.md` (opus for the orchestrator, architect, security expert and agent-console engineer; sonnet for the rest).
+- Each agent's model is chosen by job difficulty and cost of mistakes: see `docs/agent-brains.md` (opus for the orchestrator, architect, security expert, agent-console engineer and Supabase auth engineer; sonnet for the rest).
 - Effort is set per task, not per agent. Routine work runs at `low` or `medium`. Architecture, security review and scoring changes run at `high`.
 - Moving an agent to a cheaper model is the human lead's decision. It requires a passing eval run (section 13) first.
 
@@ -55,7 +55,7 @@ The Console context denies `netlify/functions/**`, `netlify.toml`, `package*.jso
 
 ## 2. Team overview
 
-17 agents: 14 required, 3 justified additions.
+18 agents: 14 required, 4 justified additions.
 
 | Code | Agent name | Persona | Group | Mission in one line |
 |---|---|---|---|---|
@@ -74,6 +74,7 @@ The Console context denies `netlify/functions/**`, `netlify.toml`, `package*.jso
 | NET | `netlify-engineer` | — | Platform | Owns Functions, Blobs, deploys, env vars and production operations. |
 | ACE | `agent-console-engineer` | — | Platform | Builds the Agent Console: Claude chat and GitHub commits from Functions. |
 | SEC | `security-expert` | — | Platform | Owns security architecture, auth, secrets and abuse prevention. |
+| SAU | `supabase-auth-engineer` | — | Platform | Builds Supabase Auth sign-in, the `profiles` table, RLS and MFA flows. *(added)* |
 | PRV | `privacy-compliance-specialist` | — | Platform | Owns data protection, retention, consent and source-terms compliance. *(added)* |
 | QA | `qa-engineer` | — | Quality | Owns test strategy, test suites and the release gate. |
 
@@ -86,6 +87,7 @@ The Console context denies `netlify/functions/**`, `netlify.toml`, `package*.jso
 | Accessibility specialist | **Include** (`accessibility-specialist`) | The app serves job seekers, a public audience. WCAG 2.2 AA is a release gate in [testing-and-accessibility.md](testing-and-accessibility.md). Liquid Glass translucency creates real contrast risk that the UI designer should not grade alone. Streaming chat, diff viewers and color-coded bands need specialist screen-reader design. A neutral reviewer with a veto prevents the designer and the tester from marking their own work. |
 | Data privacy and compliance specialist | **Include** (`privacy-compliance-specialist`) | Resumes are personal data. The app needs retention rules, deletion, consent for outcome logging, a privacy notice, Florida breach-notice readiness and review of Anthropic API data terms. Job ingestion needs an ongoing per-employer terms and robots.txt review ([job-data-sources.md](job-data-sources.md) §8). That is recurring legal-adjacent work, separate from technical security. |
 | Prompt engineer / AI systems engineer | **Include** (`ai-systems-engineer`) | Claude is used in five places: resume extraction, job-requirement extraction, explanations, agent chat and agent evals. Without one owner, prompts, schemas, model choices, caching and eval sets drift across four agents. This role owns LLM quality and Claude spend. |
+| Supabase auth engineer | **Include** (`supabase-auth-engineer`, added 2026-11-25) | The project lead chose Supabase Auth ([ADR 0006](adr/0006-supabase-auth.md)). It brings a new vendor, SQL migrations, RLS policies, a trigger, Google OAuth and TOTP MFA flows. That is Postgres and auth-client work no current owner holds in depth. Adding it to `security-expert` would make the reviewer also the builder of the main control. `security-expert` keeps the Function-side checks and the veto. |
 | Performance optimization engineer | **Exclude** | Budgets are fixed and testable (LCP ≤ 2.5 s, INP ≤ 200 ms, 200 KB JS). Front-end performance belongs to `mobile-pwa-expert`; server and CDN performance belong to `netlify-engineer`; `qa-engineer` enforces budgets in CI. A separate agent would mostly duplicate work. Revisit if budgets fail for two releases in a row. |
 | Technical writer / documentation lead | **Exclude** | `software-architect` owns `docs/` and architecture decision records. Each owner updates docs as part of "definition of done". `orchestrator` checks this at integration. Revisit if public user help content becomes large. |
 
@@ -102,7 +104,7 @@ Each profile lists the 12 required fields. "Paths" are the agent's `responsibili
 ### 4.1 `orchestrator`
 
 1. **Agent name:** `orchestrator`
-2. **Purpose:** Turn the project lead's goals into a sequenced plan and keep 16 specialists moving toward it.
+2. **Purpose:** Turn the project lead's goals into a sequenced plan and keep 17 specialists moving toward it.
 3. **One-line job description:** Runs the team: plans phases, assigns tasks, resolves hand-offs and reports status.
 4. **Primary responsibilities:**
    - Maintain the roadmap and phase plan ([README.md](README.md) implementation plan).
@@ -429,7 +431,8 @@ Each profile lists the 12 required fields. "Paths" are the agent's `responsibili
 3. **One-line job description:** Owns security architecture, authentication, authorization, secrets, abuse prevention, audit logging and the security release veto.
 4. **Primary responsibilities:**
    - Own [security.md](security.md) and the threat model.
-   - Own auth provider integration, JWT verification and role checks.
+   - Own the auth security design ([security/supabase-auth.md](security/supabase-auth.md)) and the Function-side helpers in `netlify/functions/_lib/auth/**`: token verification (`getClaims`), role read from `profiles`, `super_admin` + aal2 checks and step-up.
+   - Review `supabase-auth-engineer`'s migrations, RLS policies and auth flows.
    - Own secrets policy, rotation runbook and the GitHub token scope.
    - Own the agent path allow-list and deny-list, and tool grants for agents.
    - Own prompt-injection defenses with `ai-systems-engineer`.
@@ -439,8 +442,8 @@ Each profile lists the 12 required fields. "Paths" are the agent's `responsibili
 6. **Outputs:** Threat model; security review verdicts; policies; rotation runbooks; incident reports; security test cases.
 7. **Decision-making authority:** **Veto** on releases with known high or critical security issues, and on any agent tool or token-scope grant. Decides auth and secrets design with `software-architect`. Only the project lead can override, in writing.
 8. **Required skills:** Security architecture; authentication (OIDC, JWT, MFA); authorization (RBAC); rate limiting; secrets management; prompt-injection defense; web security (CSP, CSRF, XSS); audit logging; incident response.
-9. **Tools, APIs and docs:** Claude Code (Read, Grep, Glob, Bash for scanners; Edit on `docs/security/**`, `netlify/functions/_lib/auth/**`, `config/agent-paths.json`); OWASP ASVS and Top 10; GitHub PAT and REST docs; Netlify env var, rate limiting and Identity docs; Auth0 docs; npm audit; Dependabot.
-10. **Collaborates with:** `software-architect`, `netlify-engineer`, `agent-console-engineer`, `ai-systems-engineer`, `privacy-compliance-specialist`, `meta-agent`, `qa-engineer`.
+9. **Tools, APIs and docs:** Claude Code (Read, Grep, Glob, Bash for scanners; Edit on `docs/security/**`, `netlify/functions/_lib/auth/**`, `config/agent-paths.json`); OWASP ASVS and Top 10; GitHub PAT and REST docs; Netlify env var and rate limiting docs; Supabase Auth docs (JWTs, signing keys, MFA, API keys, RLS); npm audit; Dependabot.
+10. **Collaborates with:** `software-architect`, `netlify-engineer`, `agent-console-engineer`, `supabase-auth-engineer`, `ai-systems-engineer`, `privacy-compliance-specialist`, `meta-agent`, `qa-engineer`.
 11. **Success metrics:** Zero high/critical findings open at release; secrets rotated on schedule 100%; 100% of protected routes covered by auth tests; zero unapproved commits to `main`; dependency criticals patched ≤ 7 days.
 12. **Failure modes and risks:** Security as an afterthought; over-blocking that stalls delivery; missing injection paths through job postings; token scope creep. Mitigation: design-stage review; vetoes include a fix path; quarterly token-scope audit.
 
@@ -464,7 +467,7 @@ Each profile lists the 12 required fields. "Paths" are the agent's `responsibili
 6. **Outputs:** Data inventory; retention schedule; consent specs; privacy notice draft; source-terms register; compliance verdicts.
 7. **Decision-making authority:** **Veto** on releases that collect, keep or share personal data outside the approved inventory, and on enabling any job source without a terms decision. Legal conclusions belong to human counsel; this agent prepares and flags.
 8. **Required skills:** Privacy compliance; data minimization; retention design; consent UX; reading terms of service; US state privacy and breach laws (awareness level); fairness in automated hiring tools.
-9. **Tools, APIs and docs:** Claude Code (Read, Grep, Glob; Edit on `docs/privacy/**`, `data/registry/terms/**`); WebFetch for public terms pages; vendor DPAs and terms (Anthropic, Netlify, Auth0); robots.txt; Florida Statutes s. 501.171; FTC guidance on AI and hiring.
+9. **Tools, APIs and docs:** Claude Code (Read, Grep, Glob; Edit on `docs/privacy/**`, `data/registry/terms/**`); WebFetch for public terms pages; vendor DPAs and terms (Anthropic, Netlify, Supabase, Google sign-in); robots.txt; Florida Statutes s. 501.171; FTC guidance on AI and hiring.
 10. **Collaborates with:** `security-expert`, `job-data-integration-expert`, `resume-analysis-expert`, `candidate-job-matching-expert`, `ux-designer-apple-hig`, `netlify-engineer`, `orchestrator`.
 11. **Success metrics:** 100% of data stores in the inventory; 100% of enabled sources have a recorded terms decision; deletion test passes every release; consent captured before any outcome logging; privacy notice reviewed by counsel before launch.
 12. **Failure modes and risks:** Acting as a lawyer; terms decisions going stale; retention jobs silently failing; dark-pattern consent. Mitigation: counsel sign-off for legal conclusions; annual terms re-review; retention job alerts.
@@ -494,11 +497,34 @@ Each profile lists the 12 required fields. "Paths" are the agent's `responsibili
 
 ---
 
+### 4.18 `supabase-auth-engineer` *(added role, 2026-11-25)*
+
+1. **Agent name:** `supabase-auth-engineer`
+2. **Purpose:** Give every user a safe sign-in and keep roles out of users' reach.
+3. **One-line job description:** Builds Supabase Auth sign-in, the `profiles` table, its trigger and RLS, and the MFA flows ([ADR 0006](adr/0006-supabase-auth.md)).
+4. **Primary responsibilities:**
+   - Own `supabase/**` migrations: `public.profiles`, the sign-up trigger in the `private` schema, RLS (select own row only; no role writes).
+   - Own browser auth code in `apps/web/src/auth/**`: sign up, log in, log out, forgot and update password, Continue with Google (PKCE).
+   - Own MFA enrol and challenge for `super_admin` (TOTP, aal2).
+   - Own auth tests in `tests/auth/**` and auth docs in `docs/auth/**`.
+   - Help the project lead set up the Supabase project: asymmetric signing keys, redirect allow-list, Google OAuth client.
+   - Write the manual promotion SQL for the lead's runbook.
+5. **Inputs:** ADR 0006; [security/supabase-auth.md](security/supabase-auth.md); [design/ux/auth-flows.md](design/ux/auth-flows.md); [privacy/supabase-auth.md](privacy/supabase-auth.md); Supabase docs.
+6. **Outputs:** Reviewed SQL migrations; auth screens and client module; auth test suites; auth runbook notes.
+7. **Decision-making authority:** Decides migration and client-code structure inside its paths. Function-side checks, the role model and key handling are `security-expert`'s. Screen flows and copy are Wren's. Promotions and paid Supabase plans are the project lead's.
+8. **Required skills:** Supabase Auth (passwords, OAuth with PKCE, MFA); Postgres RLS; SQL triggers and `security definer` hygiene; JWT claims (`aal`, `amr`); TypeScript.
+9. **Tools, APIs and docs:** Claude Code (Read, Grep, Glob, Edit, Write, Bash on `supabase/**`, `apps/web/src/auth/**`, `tests/auth/**`, `docs/auth/**`); supabase-js; Supabase Auth, MFA, RLS and API-key docs. Never holds or requests a `sb_secret_` or `service_role` key.
+10. **Collaborates with:** `security-expert`, `privacy-compliance-specialist`, `ux-designer-apple-hig`, `mobile-pwa-expert`, `agent-console-engineer`, `netlify-engineer`, `accessibility-specialist`, `qa-engineer`.
+11. **Success metrics:** RLS tests prove no user reads another row or changes a role; 100% of auth flows covered by e2e tests; zero secret keys in the repo or env vars; sign-up trigger never blocks sign-up in tests.
+12. **Failure modes and risks:** Reading roles from `user_metadata`; a `security definer` function in an exposed schema; a missing `search_path` that breaks every sign-up; redirect allow-list wildcards. Mitigation: `security-expert` review of every migration; RLS tests in CI; exact production redirect URLs.
+
+---
+
 ## 5. Shared-skills matrix
 
 **O** = owner (one per skill). **B** = backup (acts when owner unavailable). **P** = possesses working skill.
 
-Agent codes: ORC orchestrator · AGB meta-agent · ARC software-architect · FIN finance-job-market-specialist · RES resume-analysis-expert · MAT candidate-job-matching-expert · AIS ai-systems-engineer · JDI job-data-integration-expert · UI Sable · UX Wren · PWA mobile-pwa-expert · A11Y accessibility-specialist · NET netlify-engineer · ACE agent-console-engineer · SEC security-expert · PRV privacy-compliance-specialist · QA qa-engineer
+Agent codes: ORC orchestrator · AGB meta-agent · ARC software-architect · FIN finance-job-market-specialist · RES resume-analysis-expert · MAT candidate-job-matching-expert · AIS ai-systems-engineer · JDI job-data-integration-expert · UI Sable · UX Wren · PWA mobile-pwa-expert · A11Y accessibility-specialist · NET netlify-engineer · ACE agent-console-engineer · SEC security-expert · SAU supabase-auth-engineer · PRV privacy-compliance-specialist · QA qa-engineer
 
 | Skill | Owner | Backups | Also possess |
 |---|---|---|---|
@@ -540,8 +566,10 @@ Agent codes: ORC orchestrator · AGB meta-agent · ARC software-architect · FIN
 | Visual design tokens | UI | PWA | UX |
 | UX writing and content | UX | FIN | PRV |
 | Security Architecture | SEC | ARC | NET, ACE |
-| Authentication | SEC | NET | ACE |
-| Authorization (RBAC, allow-lists) | SEC | ACE | NET |
+| Authentication | SEC | NET | ACE, SAU |
+| Authorization (RBAC, allow-lists) | SEC | ACE | NET, SAU |
+| Supabase Auth (`supabase-auth`) | SAU | SEC | PWA, ACE |
+| Supabase row level security (`supabase-row-level-security`) | SAU | SEC | ARC |
 | Secrets management | SEC | NET | ACE |
 | Rate Limiting and abuse prevention | SEC | NET | ACE, AIS |
 | Prompt-injection defense | SEC | AIS | ACE, AGB |
@@ -594,14 +622,15 @@ flowchart TB
     NET[netlify-engineer]
     ACE[agent-console-engineer]
     SEC[security-expert]
+    SAU[supabase-auth-engineer]
     PRV[privacy-compliance-specialist]
   end
 
   QA[qa-engineer]
 
   PL <--> ORC
-  ORC --> ARC & AGB & FIN & RES & MAT & AIS & JDI & UX & UI & PWA & NET & ACE & SEC & PRV & QA
-  AGB -. builds & evaluates .-> ORC & ARC & FIN & RES & MAT & AIS & JDI & UX & UI & PWA & A11Y & NET & ACE & SEC & PRV & QA
+  ORC --> ARC & AGB & FIN & RES & MAT & AIS & JDI & UX & UI & PWA & NET & ACE & SEC & SAU & PRV & QA
+  AGB -. builds & evaluates .-> ORC & ARC & FIN & RES & MAT & AIS & JDI & UX & UI & PWA & A11Y & NET & ACE & SEC & SAU & PRV & QA
 
   FIN -->|taxonomy, labels| RES
   FIN -->|gates, presets| MAT
@@ -621,14 +650,17 @@ flowchart TB
   ARC -->|contracts, ADRs| RES & MAT & JDI & PWA & NET & ACE
   NET -->|functions, Blobs, queue| JDI & ACE & RES
   ACE -->|console UI| PWA
+  SAU -->|auth screens, MFA| PWA
+  SAU -->|profiles, RLS| SEC
   ACE -->|GitHub commit| GH[(GitHub repo)]
   GH -->|push to main| NETLIFY[(Netlify deploy)]
 
-  SEC -. reviews / veto .-> NET & ACE & AIS & RES & PWA & AGB
-  PRV -. reviews / veto .-> JDI & RES & MAT & NET & UX
+  SEC -. reviews / veto .-> NET & ACE & AIS & RES & PWA & AGB & SAU
+  PRV -. reviews / veto .-> JDI & RES & MAT & NET & UX & SAU
+  A11Y -. reviews / veto .-> SAU
 
   QA -->|release report| ORC
-  RES & MAT & JDI & PWA & NET & ACE & AIS --> QA
+  RES & MAT & JDI & PWA & NET & ACE & AIS & SAU --> QA
   ORC -->|go / no-go recommendation| PL
   PL -->|approve proposals & releases| ACE
 ```
