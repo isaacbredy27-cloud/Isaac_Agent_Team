@@ -13,6 +13,7 @@ export function normalizeText(s: string): string {
   return s
     .normalize("NFKC")
     .toLowerCase()
+    .replace(/(?<=\b\p{L})\.(?=\p{L}\b)/gu, "") // b.s. -> bs
     .replace(/[^\p{L}\p{N}+#]+/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
