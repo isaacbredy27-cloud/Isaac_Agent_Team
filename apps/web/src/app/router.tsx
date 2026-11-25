@@ -1,6 +1,5 @@
 import { createBrowserRouter, type RouteObject } from "react-router-dom";
 import { authRoutes } from "../auth";
-import { consoleRoutes } from "../console";
 import { Layout } from "./Layout";
 import { JobsPage } from "./JobsPage";
 import { JobDetailPage } from "./JobDetailPage";
@@ -17,8 +16,15 @@ const children: RouteObject[] = [
   { path: "how-it-works", element: <HowItWorksPage /> },
   { path: "resources", element: <ResourcesPage /> },
   ...authRoutes.map((r): RouteObject => ({ path: r.path, element: r.element })),
-  ...consoleRoutes,
   { path: "*", element: <NotFoundPage /> },
 ];
 
-export const router = createBrowserRouter([{ path: "/", element: <Layout />, children }]);
+export const router = createBrowserRouter([{ id: "root", path: "/", element: <Layout />, children }], {
+  // Console code loads only when someone opens /agents (keeps route JS small).
+  async patchRoutesOnNavigation({ path, patch }) {
+    if (path.startsWith("/agents")) {
+      const { consoleRoutes } = await import("../console");
+      patch("root", consoleRoutes);
+    }
+  },
+});
