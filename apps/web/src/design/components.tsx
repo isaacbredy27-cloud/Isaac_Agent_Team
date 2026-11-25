@@ -5,6 +5,7 @@ import {
   type ButtonHTMLAttributes,
   type HTMLAttributes,
   type ReactNode,
+  type Ref,
 } from "react";
 
 /* Small typed components over base.css. Import "./tokens.css" and "./base.css" once at the app entry. */
@@ -16,10 +17,12 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   block?: boolean;
+  /** React 19: ref is a regular prop. */
+  ref?: Ref<HTMLButtonElement>;
 }
 
-export function Button({ variant = "primary", block, className, type = "button", ...rest }: ButtonProps) {
-  return <button type={type} className={cx("button", `button--${variant}`, block && "button--block", className)} {...rest} />;
+export function Button({ variant = "primary", block, className, type = "button", ref, ...rest }: ButtonProps) {
+  return <button ref={ref} type={type} className={cx("button", `button--${variant}`, block && "button--block", className)} {...rest} />;
 }
 
 export interface CardProps extends HTMLAttributes<HTMLElement> {

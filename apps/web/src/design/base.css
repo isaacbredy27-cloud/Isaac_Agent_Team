@@ -31,6 +31,13 @@ h3 { font-size: var(--text-md); line-height: 1.3; font-weight: 600; }
 .text-sm { font-size: var(--text-sm); }
 .text-xs { font-size: var(--text-xs); }
 .mono { font-family: var(--font-mono); }
+.text-bold { font-weight: 700; }
+.pre-wrap { white-space: pre-wrap; }
+.scroll-x { overflow-x: auto; }
+.text-left { text-align: left; }
+/* Bare form controls outside .field still get 44 px targets */
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select { min-height: var(--tap); }
+input[type="checkbox"], input[type="radio"] { width: 1.5rem; height: 1.5rem; }
 
 /* Focus: always visible, 3:1 against adjacent colors */
 :focus-visible {
@@ -172,6 +179,9 @@ h3 { font-size: var(--text-md); line-height: 1.3; font-weight: 600; }
 .sheet--large { height: 90vh; }
 .sheet__grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--border-strong); margin: 0 auto var(--space-3); }
 .sheet__header { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
+/* Native <dialog> used as a sheet: pin to bottom, same detent rules */
+dialog.sheet { position: fixed; inset: auto 0 0 0; margin: 0 auto; color: var(--text-primary); }
+dialog.sheet::backdrop { background: rgb(0 0 0 / 0.4); }
 @keyframes sheet-in { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 /* Alias used by auth screens */

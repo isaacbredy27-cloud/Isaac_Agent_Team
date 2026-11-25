@@ -1,7 +1,8 @@
 /// <reference types="vite/client" />
 // Browser Supabase client. Only the project URL and the publishable key (both public). ADR 0006.
 // Never a secret key or the legacy service_role key.
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+// supabase-js loads lazily on first use, so it stays out of the main bundle.
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { SECRET_KEY_PREFIX, isPublicConfig, isStubEnabled } from "./helpers";
 
 const url: unknown = import.meta.env.VITE_SUPABASE_URL;
@@ -17,26 +18,42 @@ if (typeof publishableKey === "string" && publishableKey.startsWith(SECRET_KEY_P
   console.error("Refusing a secret key in the browser. Use the publishable key.");
 }
 
-export const supabase: SupabaseClient | null = authConfigured
-  ? createClient(url as string, publishableKey as string, {
-      auth: {
-        flowType: "pkce",
-        persistSession: true,
-        autoRefreshToken: true,
-        // We exchange the PKCE code ourselves in AuthCallback / UpdatePassword.
-        detectSessionInUrl: false,
-      },
-    })
-  : null;
+let clientPromise: Promise<SupabaseClient | null> | null = null;
+
+/** The one browser client, created on first call. Null when auth is not configured. */
+export function getSupabase(): Promise<SupabaseClient | null> {
+  if (!authConfigured) return Promise.resolve(null);
+  if (!clientPromise) {
+    clientPromise = import("@supabase/supabase-js").then(({ createClient }) =>
+      createClient(url as string, publishableKey as string, {
+        auth: {
+          flowType: "pkce",
+          persistSession: true,
+          autoRefreshToken: true,
+          // We exchange the PKCE code ourselves in AuthCallback / UpdatePassword.
+          detectSessionInUrl: false,
+        },
+      }),
+    );
+    // A failed chunk load (offline) may retry on the next call.
+    clientPromise.catch(() => {
+      clientPromise = null;
+    });
+  }
+  return clientPromise;
+}
 
 // Guards a PKCE code against double exchange (React StrictMode runs effects twice).
 const exchanges = new Map<string, Promise<{ error: unknown }>>();
 
 export function exchangeCodeOnce(code: string): Promise<{ error: unknown }> {
-  if (!supabase) return Promise.resolve({ error: new Error("not_configured") });
   let p = exchanges.get(code);
   if (!p) {
-    p = supabase.auth.exchangeCodeForSession(code).then(({ error }) => ({ error }));
+    p = getSupabase().then((sb) =>
+      sb
+        ? sb.auth.exchangeCodeForSession(code).then(({ error }) => ({ error }))
+        : { error: new Error("not_configured") },
+    );
     exchanges.set(code, p);
   }
   return p;

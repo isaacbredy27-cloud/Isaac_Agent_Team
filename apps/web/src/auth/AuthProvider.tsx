@@ -1,8 +1,8 @@
 // Auth context. Role comes from the caller's own profiles row (RLS), never user_metadata.
 // The UI uses role and aal for routing only. Every Function re-checks token, role, aal2 and step-up.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { authConfigured, authStub, supabase } from "./supabase";
+import type { Session, SupabaseClient, User } from "@supabase/supabase-js";
+import { authConfigured, authStub, getSupabase } from "./supabase";
 import { authPaths, makeStubToken, mapAuthError, parseAal, parseRole, type Aal, type AuthErrorKind, type Role } from "./helpers";
 
 export interface AuthResult {
@@ -110,6 +110,10 @@ function useStubAuth(): AuthContextValue {
 
 const NOT_CONFIGURED: AuthResult = { error: "notConfigured" };
 
+/** The lazy client, or null if its chunk failed to load (usually offline). */
+const client = (): Promise<SupabaseClient | null> => getSupabase().catch(() => null);
+const unavailable = (): AuthResult => ({ error: online() ? "generic" : "offline" });
+
 function useSupabaseAuth(): AuthContextValue {
   const [loading, setLoading] = useState<boolean>(authConfigured);
   const [session, setSession] = useState<Session | null>(null);
@@ -122,6 +126,8 @@ function useSupabaseAuth(): AuthContextValue {
   const load = useCallback(async (s: Session | null) => {
     const mine = ++seq.current;
     setSession(s);
+    const supabase = s ? await client() : null;
+    if (mine !== seq.current) return; // a newer auth event won
     if (!supabase || !s) {
       setRole(null);
       setAal({ current: null, next: null });
@@ -139,33 +145,45 @@ function useSupabaseAuth(): AuthContextValue {
   }, []);
 
   useEffect(() => {
-    if (!supabase) return;
-    const client = supabase;
+    if (!authConfigured) return;
     let active = true;
-    client.auth.getSession().then(({ data }) => {
-      if (active) void load(data.session);
-    });
-    const { data: sub } = client.auth.onAuthStateChange((_event, s) => {
-      // Do not await Supabase calls inside this callback; defer them.
-      setTimeout(() => {
-        if (active) void load(s);
-      }, 0);
-    });
+    let unsubscribe: (() => void) | null = null;
+    void getSupabase()
+      .then((sb) => {
+        if (!active || !sb) {
+          if (active) setLoading(false);
+          return;
+        }
+        sb.auth.getSession().then(({ data }) => {
+          if (active) void load(data.session);
+        });
+        const { data: sub } = sb.auth.onAuthStateChange((_event, s) => {
+          // Do not await Supabase calls inside this callback; defer them.
+          setTimeout(() => {
+            if (active) void load(s);
+          }, 0);
+        });
+        unsubscribe = () => sub.subscription.unsubscribe();
+      })
+      .catch(() => {
+        // Chunk failed to load (offline). Show signed out; a later call retries.
+        if (active) setLoading(false);
+      });
     return () => {
       active = false;
-      sub.subscription.unsubscribe();
+      unsubscribe?.();
     };
   }, [load]);
 
   const refresh = useCallback(async () => {
-    if (!supabase) return;
-    const { data } = await supabase.auth.getSession();
+    const sb = await client();
+    if (!sb) return;
+    const { data } = await sb.auth.getSession();
     await load(data.session);
   }, [load]);
 
   return useMemo<AuthContextValue>(() => {
-    const sb = supabase;
-    if (!sb) {
+    if (!authConfigured) {
       const off = async () => NOT_CONFIGURED;
       return {
         configured: false,
@@ -197,10 +215,14 @@ function useSupabaseAuth(): AuthContextValue {
       role,
       aal,
       async signIn(email, password) {
+        const sb = await client();
+        if (!sb) return unavailable();
         const { error } = await sb.auth.signInWithPassword({ email, password });
         return { error: mapAuthError(error, "signIn", online()) };
       },
       async signUp(email, password) {
+        const sb = await client();
+        if (!sb) return unavailable();
         const { error } = await sb.auth.signUp({
           email,
           password,
@@ -209,20 +231,28 @@ function useSupabaseAuth(): AuthContextValue {
         return { error: mapAuthError(error, "signUp", online()) };
       },
       async signOut() {
+        const sb = await client();
+        if (!sb) return unavailable();
         const { error } = await sb.auth.signOut();
         return { error: error ? mapAuthError(error, "update", online()) : null };
       },
       async resetPassword(email) {
+        const sb = await client();
+        if (!sb) return unavailable();
         const { error } = await sb.auth.resetPasswordForEmail(email, {
           redirectTo: `${origin()}${authPaths.updatePassword}`,
         });
         return { error: mapAuthError(error, "reset", online()) };
       },
       async updatePassword(password) {
+        const sb = await client();
+        if (!sb) return unavailable();
         const { error } = await sb.auth.updateUser({ password });
         return { error: mapAuthError(error, "update", online()) };
       },
       async signInWithGoogle() {
+        const sb = await client();
+        if (!sb) return unavailable();
         const { error } = await sb.auth.signInWithOAuth({
           provider: "google",
           options: { redirectTo: `${origin()}${authPaths.callback}` },
@@ -230,6 +260,8 @@ function useSupabaseAuth(): AuthContextValue {
         return { error: mapAuthError(error, "oauth", online()) };
       },
       async getAccessToken() {
+        const sb = await client();
+        if (!sb) return null;
         const { data } = await sb.auth.getSession();
         return data.session?.access_token ?? null;
       },
@@ -237,6 +269,8 @@ function useSupabaseAuth(): AuthContextValue {
       mfaEnroll() {
         if (enrolling.current) return enrolling.current;
         const run = (async (): Promise<AuthResult & { enrollment?: TotpEnrollment }> => {
+        const sb = await client();
+        if (!sb) return unavailable();
         // Drop stale unverified TOTP factors first, so a retry does not hit a name clash.
         const listed = await sb.auth.mfa.listFactors();
         for (const f of listed.data?.all ?? []) {
@@ -256,6 +290,8 @@ function useSupabaseAuth(): AuthContextValue {
         return run;
       },
       async mfaVerify(code, factorId) {
+        const sb = await client();
+        if (!sb) return unavailable();
         let id = factorId;
         if (!id) {
           const listed = await sb.auth.mfa.listFactors();
@@ -268,6 +304,8 @@ function useSupabaseAuth(): AuthContextValue {
         return { error: null };
       },
       async hasVerifiedTotp() {
+        const sb = await client();
+        if (!sb) return false;
         const listed = await sb.auth.mfa.listFactors();
         return (listed.data?.totp ?? []).some((f) => f.status === "verified");
       },
