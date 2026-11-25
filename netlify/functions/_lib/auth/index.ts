@@ -89,8 +89,8 @@ export async function requireUser(req: Request, deps: AuthDeps = {}): Promise<Au
   if (!url || !key) throw new AuthError(503, "auth_unavailable");
 
   const m = BEARER.exec(header);
-  if (!m || m[1].length > MAX_TOKEN_BYTES) throw new AuthError(401, "unauthorized");
-  const token = m[1];
+  const token = m?.[1];
+  if (!token || token.length > MAX_TOKEN_BYTES) throw new AuthError(401, "unauthorized");
 
   const factory = deps.createClient ?? factoryOverride ?? defaultClientFactory;
   const supabase = factory(url, key, token);
@@ -114,7 +114,7 @@ export async function requireUser(req: Request, deps: AuthDeps = {}): Promise<Au
     typeof claims.exp !== "number" || claims.exp <= now ||
     claims.is_anonymous === true
   ) throw new AuthError(401, "unauthorized");
-  const userId = claims.sub;
+  const userId = claims.sub as string;
 
   let row: { role?: unknown } | null;
   try {

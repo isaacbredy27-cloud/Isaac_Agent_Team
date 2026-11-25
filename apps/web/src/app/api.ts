@@ -1,8 +1,10 @@
 import {
+  GapsResponseSchema,
   JobsResponseSchema,
   MatchResponseSchema,
   ResumeResponseSchema,
   type CandidateProfile,
+  type GapEntry,
   type JobsResponse,
   type MatchResult,
 } from "@schemas";
@@ -47,4 +49,14 @@ export async function postMatch(profile: CandidateProfile, jobIds?: string[], si
     ...(signal ? { signal } : {}),
   };
   return MatchResponseSchema.parse(await readJson(await fetch("/api/match", init))).results;
+}
+
+export async function postGaps(profile: CandidateProfile, jobIds?: string[], signal?: AbortSignal): Promise<GapEntry[]> {
+  const init: RequestInit = {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(jobIds ? { profile, jobIds } : { profile }),
+    ...(signal ? { signal } : {}),
+  };
+  return GapsResponseSchema.parse(await readJson(await fetch("/api/gaps", init))).gaps;
 }

@@ -1,8 +1,9 @@
 // Synthetic resumes only (ADR 0004).
 import { describe, expect, it } from "vitest";
+import { readFileSync, existsSync } from "node:fs";
 import JSZip from "jszip";
 import { CandidateProfileSchema } from "../../packages/schemas/src/index.ts";
-import { buildProfile, detectKind, estimateYears, extractResumeText, parseResume, ResumeError, MAX_BYTES } from "../../packages/resume/src/index.ts";
+import { buildProfile, detectKind, estimateYears, extractResumeText, isZipSafe, parseResume, ResumeError, MAX_BYTES } from "../../packages/resume/src/index.ts";
 import handler, { config } from "../../netlify/functions/resume.ts";
 
 const ASOF = new Date(Date.UTC(2026, 10, 15));
@@ -109,5 +110,52 @@ describe("POST /api/resume", () => {
     expect(r2.status).toBe(400);
     const r3 = await handler(new Request("http://x/api/resume", { method: "GET" }), ctx);
     expect(r3.status).toBe(405);
+  });
+  it("rejects a streamed oversize body with 413", async () => {
+    const chunk = new Uint8Array(1024 * 1024).fill(65);
+    let sent = 0;
+    const stream = new ReadableStream<Uint8Array>({
+      pull(c) { if (sent++ < 7) c.enqueue(chunk); else c.close(); },
+    });
+    const req = new Request("http://x/api/resume", { method: "POST", headers: { "content-type": "application/json" }, body: stream, duplex: "half" } as RequestInit);
+    const res = await handler(req, ctx);
+    expect(res.status).toBe(413);
+  });
+  it("rejects wrong content types with 415", async () => {
+    for (const ct of ["text/plain", "application/x-www-form-urlencoded", ""]) {
+      const headers: Record<string, string> = ct ? { "content-type": ct } : {};
+      const res = await handler(new Request("http://x/api/resume", { method: "POST", headers, body: "{}" }), ctx);
+      expect(res.status).toBe(415);
+      expect(await res.json()).toEqual({ error: "unsupported_media_type" });
+    }
+  });
+});
+
+describe("zip bomb guard", () => {
+  it("rejects a high-ratio DOCX as unreadable", async () => {
+    const z = new JSZip();
+    z.file("word/document.xml", "A".repeat(5 * 1024 * 1024));
+    const bytes = await z.generateAsync({ type: "uint8array", compression: "DEFLATE", compressionOptions: { level: 9 } });
+    expect(bytes.length).toBeLessThan(MAX_BYTES);
+    await expect(extractResumeText(bytes)).rejects.toMatchObject({ code: "unreadable_file" });
+  });
+  it("rejects too many entries and accepts a normal DOCX", async () => {
+    const z = new JSZip();
+    z.file("word/document.xml", "<w:document/>");
+    for (let i = 0; i < 501; i++) z.file(`f${i}.txt`, `file ${i} ${Math.random()}`);
+    await expect(extractResumeText(await z.generateAsync({ type: "uint8array" }))).rejects.toMatchObject({ code: "unreadable_file" });
+    expect(isZipSafe(await makeDocx(TEXT))).toBe(true);
+    expect(isZipSafe(enc("PK\x03\x04 not a zip"))).toBe(false);
+  });
+});
+
+describe("real PDF", () => {
+  const fx = new URL("../../knowledge/resume-analysis-expert/examples/fixtures/synthetic-resume.pdf", import.meta.url);
+  it.skipIf(!existsSync(fx))("extracts the synthetic PDF", async () => {
+    const out = await extractResumeText(new Uint8Array(readFileSync(fx)));
+    expect(out.kind).toBe("pdf");
+    expect(out.text).toMatch(/Senior Financial Analyst/);
+    const p = await parseResume({ bytes: new Uint8Array(readFileSync(fx)) }, { asOf: ASOF });
+    expect(p.titles).toContain("senior_financial_analyst");
   });
 });

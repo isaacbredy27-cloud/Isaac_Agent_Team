@@ -68,7 +68,7 @@ async function extractPdf(bytes: Uint8Array): Promise<Extracted> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     const work = (async () => {
-      pdf = await getDocumentProxy(new Uint8Array(bytes), { isEvalSupported: false });
+      pdf = await getDocumentProxy(new Uint8Array(bytes), { isEvalSupported: false } as Parameters<typeof getDocumentProxy>[1]);
       if (pdf.numPages > MAX_PAGES) throw new ResumeError("too_many_pages");
       const { totalPages, text } = await extractText(pdf, { mergePages: false });
       const pages = Array.isArray(text) ? text : [text];
@@ -81,7 +81,9 @@ async function extractPdf(bytes: Uint8Array): Promise<Extracted> {
     return await Promise.race([work, timeout]);
   } finally {
     clearTimeout(timer);
-    await pdf?.destroy().catch(() => undefined);
+    // This pdf.js build exposes destroy() on the loading task, not on the document proxy.
+    const p = pdf as unknown as { destroy?: () => Promise<void>; loadingTask?: { destroy?: () => Promise<void> } } | undefined;
+    await (p?.destroy ? p.destroy() : p?.loadingTask?.destroy?.())?.catch?.(() => undefined);
   }
 }
 

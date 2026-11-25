@@ -198,3 +198,15 @@ export type RejectResponse = z.infer<typeof RejectResponseSchema>;
 /** Errors are `{ error: "<code>" }` only, e.g. "base_sha_changed". */
 export const ErrorResponseSchema = z.object({ error: z.string().regex(/^[a-z0-9_]+$/) }).strict();
 export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
+
+// POST /api/gaps — skill-gap analysis over the top Strong/Moderate matches.
+export const GapEntrySchema = z.object({
+  gap: z.string(),
+  kind: z.enum(["skill", "cert"]),
+  jobsMissing: z.number().int().nonnegative(),
+  bandUpgrades: z.number().int().nonnegative(),
+  link: z.string().nullable(),
+});
+export const GapsResponseSchema = z.object({ gaps: z.array(GapEntrySchema) });
+export type GapEntry = z.infer<typeof GapEntrySchema>;
+export type GapsResponse = z.infer<typeof GapsResponseSchema>;

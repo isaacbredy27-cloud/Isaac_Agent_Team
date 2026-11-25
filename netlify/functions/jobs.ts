@@ -25,7 +25,7 @@ export default async (req: Request, _context: Context): Promise<Response> => {
     const { jobs, source } = await getJobs({ q, since });
     return json({ jobs, source, fetchedAt: new Date().toISOString() }, {}, {
       cdnSeconds: TWO_HOURS,
-      // TODO(netlify-engineer): add `vary: "query=q|since"` once json() supports it (_lib/platform/http.ts).
+      vary: "query=q|since",
     });
   } catch {
     return error("jobs_unavailable", 503);
