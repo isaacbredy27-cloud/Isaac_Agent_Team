@@ -11,9 +11,9 @@ export function RequireSession({ children }: { children: ReactNode }) {
   const location = useLocation();
   if (auth.loading) {
     return (
-      <main className="auth-page">
+      <div className="auth-page">
         <Status>{authCopy.loading}</Status>
-      </main>
+      </div>
     );
   }
   if (!auth.session) return <Navigate to={authPaths.signIn} replace state={{ from: location.pathname }} />;

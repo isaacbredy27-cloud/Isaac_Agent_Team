@@ -23,9 +23,9 @@ export function NotAvailable() {
 
 function Loading() {
   return (
-    <main className="auth-page">
+    <div className="auth-page">
       <Status>{authCopy.loading}</Status>
-    </main>
+    </div>
   );
 }
 

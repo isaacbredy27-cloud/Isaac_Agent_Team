@@ -62,7 +62,7 @@ export function MfaEnroll({ onDone }: { onDone?: () => void }) {
   if (step === "done") {
     return (
       <AuthPage title={authCopy.mfaEnroll.doneTitle}>
-        <button type="button" className="button button-primary" onClick={() => onDone?.()}>
+        <button type="button" className="button button--primary" onClick={() => onDone?.()}>
           {authCopy.mfaEnroll.doneButton}
         </button>
       </AuthPage>
@@ -102,7 +102,7 @@ export function MfaEnroll({ onDone }: { onDone?: () => void }) {
             {authCopy.mfaEnroll.copy}
           </button>
           {copied ? <Status>{authCopy.mfaEnroll.copied}</Status> : null}
-          <button type="button" className="button button-primary" onClick={() => setStep("code")}>
+          <button type="button" className="button button--primary" onClick={() => setStep("code")}>
             {authCopy.mfaEnroll.next}
           </button>
         </>

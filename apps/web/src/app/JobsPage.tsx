@@ -51,7 +51,7 @@ export function JobsPage() {
       <form className="stack" role="search" onSubmit={(e) => e.preventDefault()}>
         <label className="stack">
           <span>{copy.jobs.searchLabel}</span>
-          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} style={{ minHeight: 44 }} />
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} />
         </label>
         <div className="row">
           <label className="row">
@@ -59,12 +59,12 @@ export function JobsPage() {
             <span>{copy.jobs.remoteOnly}</span>
           </label>
           <label className="row">
-            <span>Posted within</span>
-            <select value={within} onChange={(e) => setWithin(Number(e.target.value))} style={{ minHeight: 44 }}>
-              <option value={0}>Any time</option>
-              <option value={1}>1 day</option>
-              <option value={7}>7 days</option>
-              <option value={30}>30 days</option>
+            <span>{copy.jobs.postedWithin}</span>
+            <select value={within} onChange={(e) => setWithin(Number(e.target.value))}>
+              <option value={0}>{copy.jobs.anyTime}</option>
+              <option value={1}>{copy.jobs.oneDay}</option>
+              <option value={7}>{copy.jobs.sevenDays}</option>
+              <option value={30}>{copy.jobs.thirtyDays}</option>
             </select>
           </label>
           <Button variant="ghost" onClick={reset}>
@@ -74,9 +74,11 @@ export function JobsPage() {
       </form>
       <div role="status" aria-live="polite" className="text-sm text-secondary">
         {jobsStatus === "ready" ? copy.jobs.resultCount(list.length) : null}
-        {profile && matchStatus === "error" ? ` ${copy.errors.generic}` : null}
         {fetchedAt ? ` ${copy.jobs.updated(new Date(fetchedAt).toLocaleString())}` : null}
       </div>
+      {profile && matchStatus === "error" && (
+        <EmptyState title={copy.jobs.error} action={<Button onClick={reloadJobs}>{copy.app.tryAgain}</Button>} />
+      )}
       {jobsStatus === "loading" && <Spinner label={copy.jobs.loading} />}
       {jobsStatus === "error" && (
         <EmptyState title={copy.jobs.error} action={<Button onClick={reloadJobs}>{copy.app.tryAgain}</Button>} />

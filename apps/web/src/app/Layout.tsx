@@ -44,7 +44,8 @@ export function Layout() {
   useEffect(() => window.scrollTo(0, 0), [pathname]);
 
   const tabs = tabBar.filter((t) => !t.superAdminOnly || role === "super_admin");
-  const isJobs = (path: string) => path === "/jobs" && (pathname === "/" || pathname.startsWith("/jobs"));
+  // Only "/" needs the override: the Jobs tab points to /jobs but "/" shows the same screen.
+  const isJobs = (path: string) => path === "/jobs" && pathname === "/";
 
   return (
     <>
@@ -53,7 +54,7 @@ export function Layout() {
       </a>
       <GlassBar position="top" as="header">
         <div className="row-between grow">
-          <Link to="/" className="text-sm" style={{ fontWeight: 700 }}>
+          <Link to="/" className="text-sm text-bold">
             {copy.app.name}
           </Link>
           <nav aria-label={copy.nav.siteLinksLabel} className="row text-sm">
@@ -64,6 +65,7 @@ export function Layout() {
       <main id="main" className="page stack-lg" tabIndex={-1}>
         {!online && (
           <p role="status" className="card">
+            <span aria-hidden="true">⚠ </span>
             {copy.offline.banner}
           </p>
         )}
@@ -74,7 +76,7 @@ export function Layout() {
           <nav aria-label={copy.nav.siteLinksLabel} className="row">
             <SiteLinks />
             <a href={REPO} target="_blank" rel="noreferrer noopener">
-              GitHub
+              {copy.nav.github}
             </a>
           </nav>
         </footer>

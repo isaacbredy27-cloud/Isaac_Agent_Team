@@ -1,4 +1,4 @@
-// Shared auth UI pieces. Classes come from apps/web/src/design (Sable): .card .button .button-primary .field.
+// Shared auth UI pieces. Classes come from apps/web/src/design (Sable): .card .button .button--primary .field.
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { authCopy } from "../copy";
 import type { AuthErrorKind } from "../helpers";
@@ -7,14 +7,14 @@ export function AuthPage({ title, children }: { title: string; children: ReactNo
   const h = useRef<HTMLHeadingElement>(null);
   useEffect(() => h.current?.focus(), []);
   return (
-    <main className="auth-page">
+    <div className="auth-page">
       <section className="card auth-card" aria-labelledby="auth-title">
         <h1 id="auth-title" ref={h} tabIndex={-1}>
           {title}
         </h1>
         {children}
       </section>
-    </main>
+    </div>
   );
 }
 
@@ -128,7 +128,7 @@ export function CodeField({ value, onChange, readOnly }: { value: string; onChan
 /** Primary submit. Keeps focus and width while busy (aria-disabled, not disabled). */
 export function SubmitButton({ busy, label, busyLabel }: { busy: boolean; label: string; busyLabel: string }) {
   return (
-    <button type="submit" className="button button-primary" aria-disabled={busy || undefined}>
+    <button type="submit" className="button button--primary" aria-disabled={busy || undefined}>
       {busy ? busyLabel : label}
     </button>
   );

@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "netlify dev",
     "dev:web": "vite --config apps/web/vite.config.ts",
+    "serve:local": "node scripts/serve-local.mjs",
     "build:manifest": "node scripts/build-agent-manifest.mjs",
     "build": "npm run build:manifest && vite build --config apps/web/vite.config.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json",

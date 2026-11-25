@@ -1,7 +1,7 @@
 // Public surface of apps/web/src/auth (owner: supabase-auth-engineer).
 export { AuthProvider, useAuth } from "./AuthProvider";
 export type { AuthContextValue, AuthResult, TotpEnrollment } from "./AuthProvider";
-export { authConfigured, authStub, supabase } from "./supabase";
+export { authConfigured, authStub, getSupabase } from "./supabase";
 export { authRoutes } from "./routes";
 export type { AuthRoute } from "./routes";
 export { RequireSuperAdmin, NotAvailable } from "./RequireSuperAdmin";
