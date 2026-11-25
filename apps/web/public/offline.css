@@ -1,0 +1,9 @@
+:root { color-scheme: light dark; }
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 1rem; box-sizing: border-box;
+  font: 1rem/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background: #f2f4f7; color: #12161c; }
+main { max-width: 28rem; text-align: center; }
+h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+a, button { display: inline-block; min-height: 44px; padding: 0 1.25rem; line-height: 44px; border: 0; border-radius: 12px;
+  background: #0b3d6e; color: #fff; font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+a:focus-visible, button:focus-visible { outline: 3px solid #0b3d6e; outline-offset: 3px; }
+@media (prefers-color-scheme: dark) { body { background: #0a0d12; color: #f2f4f7; } a, button { background: #8fc2ff; color: #08305a; } a:focus-visible, button:focus-visible { outline-color: #8fc2ff; } }

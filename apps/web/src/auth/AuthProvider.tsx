@@ -116,6 +116,8 @@ function useSupabaseAuth(): AuthContextValue {
   const [role, setRole] = useState<Role | null>(null);
   const [aal, setAal] = useState<{ current: Aal | null; next: Aal | null }>({ current: null, next: null });
   const seq = useRef(0);
+  // One enrolment at a time (React StrictMode mounts effects twice).
+  const enrolling = useRef<Promise<AuthResult & { enrollment?: TotpEnrollment }> | null>(null);
 
   const load = useCallback(async (s: Session | null) => {
     const mine = ++seq.current;
@@ -232,7 +234,9 @@ function useSupabaseAuth(): AuthContextValue {
         return data.session?.access_token ?? null;
       },
       refresh,
-      async mfaEnroll() {
+      mfaEnroll() {
+        if (enrolling.current) return enrolling.current;
+        const run = (async (): Promise<AuthResult & { enrollment?: TotpEnrollment }> => {
         // Drop stale unverified TOTP factors first, so a retry does not hit a name clash.
         const listed = await sb.auth.mfa.listFactors();
         for (const f of listed.data?.all ?? []) {
@@ -241,6 +245,15 @@ function useSupabaseAuth(): AuthContextValue {
         const { data, error } = await sb.auth.mfa.enroll({ factorType: "totp" });
         if (error || !data) return { error: mapAuthError(error ?? new Error("enroll"), "mfa", online()) };
         return { error: null, enrollment: { factorId: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret } };
+        })();
+        enrolling.current = run;
+        void run.finally(() => {
+          // Keep the result briefly so a StrictMode remount reuses it.
+          setTimeout(() => {
+            if (enrolling.current === run) enrolling.current = null;
+          }, 1000);
+        });
+        return run;
       },
       async mfaVerify(code, factorId) {
         let id = factorId;

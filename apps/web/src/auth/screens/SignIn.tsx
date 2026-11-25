@@ -37,7 +37,7 @@ export function SignIn() {
 
   return (
     <AuthPage title={authCopy.signIn.title}>
-      {notice === "loggedOut" ? <Status>You're logged out.</Status> : null}
+      {notice === "loggedOut" ? <Status>{authCopy.loggedOut}</Status> : null}
       <ErrorMessage kind={error} />
       <GoogleButton onClick={google} disabled={busy || !auth.configured} />
       <Divider />

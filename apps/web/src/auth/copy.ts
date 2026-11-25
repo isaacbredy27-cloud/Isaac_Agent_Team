@@ -13,6 +13,7 @@ export const authCopy = {
   backToLogin: "Back to log in",
   logOut: "Log out",
   notConfigured: "Sign in is not set up yet.",
+  loggedOut: "You're logged out.",
 
   signIn: {
     title: "Log in",

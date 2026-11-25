@@ -1,0 +1,20 @@
+// Public surface of apps/web/src/auth (owner: supabase-auth-engineer).
+export { AuthProvider, useAuth } from "./AuthProvider";
+export type { AuthContextValue, AuthResult, TotpEnrollment } from "./AuthProvider";
+export { authConfigured, authStub, supabase } from "./supabase";
+export { authRoutes } from "./routes";
+export type { AuthRoute } from "./routes";
+export { RequireSuperAdmin, NotAvailable } from "./RequireSuperAdmin";
+export { RequireSession } from "./RequireSession";
+export { StepUpSheet } from "./screens/StepUpSheet";
+export type { StepUpSheetProps } from "./screens/StepUpSheet";
+export { SignIn } from "./screens/SignIn";
+export { SignUp } from "./screens/SignUp";
+export { ForgotPassword } from "./screens/ForgotPassword";
+export { UpdatePassword } from "./screens/UpdatePassword";
+export { AuthCallback } from "./screens/AuthCallback";
+export { MfaEnroll } from "./screens/MfaEnroll";
+export { MfaChallenge } from "./screens/MfaChallenge";
+export { authCopy } from "./copy";
+export { authPaths, parseStubToken, makeStubToken } from "./helpers";
+export type { Role, Aal, AuthErrorKind } from "./helpers";
