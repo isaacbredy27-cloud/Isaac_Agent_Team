@@ -11,8 +11,7 @@ const ROUTE = "/api/proposals/:id/reject";
 export default withAuth(
   async (req, context, auth) => {
     if (req.method !== "POST") return error("method_not_allowed", 405);
-    const origin = req.headers.get("origin");
-    if (origin && origin !== new URL(req.url).origin) return error("bad_origin", 403);
+    if (req.headers.get("origin") !== new URL(req.url).origin) return error("bad_origin", 403);
     const body = await readJson(req, RejectRequestSchema);
     if (!body.ok) return body.response;
     const id = context.params?.id ?? "";

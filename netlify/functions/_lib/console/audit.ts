@@ -9,6 +9,7 @@ export type AuditEvent = {
   result: string;
   proposalId?: string;
   agent?: string;
+  details?: { stepUpAt?: number };
 };
 
 export const hashSub = (sub: string): string => createHash("sha256").update(sub).digest("hex").slice(0, 32);

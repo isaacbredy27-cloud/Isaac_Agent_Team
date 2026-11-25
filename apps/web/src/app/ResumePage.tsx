@@ -31,7 +31,7 @@ function ListEditor({ label, items, onChange }: { label: string; items: string[]
         ))}
       </ul>
       <div className="row">
-        <label htmlFor={id} className="visually-hidden">{`Add to ${label}`}</label>
+        <label htmlFor={id} className="visually-hidden">{copy.resume.addTo(label)}</label>
         <input
           id={id}
           value={draft}
@@ -42,7 +42,6 @@ function ListEditor({ label, items, onChange }: { label: string; items: string[]
               add();
             }
           }}
-          style={{ minHeight: 44 }}
         />
         <Button variant="secondary" onClick={add}>
           Add
@@ -122,8 +121,7 @@ export function ResumePage() {
               max={70}
               value={current.yearsExperience}
               onChange={(e) => edit({ yearsExperience: Math.min(70, Math.max(0, Number(e.target.value) || 0)) })}
-              style={{ minHeight: 44 }}
-            />
+                />
           </label>
           <div className="row">
             <Button
@@ -137,7 +135,7 @@ export function ResumePage() {
               {copy.resume.save}
             </Button>
             <Button variant="danger" onClick={() => setConfirm(true)}>
-              Delete my data
+              {copy.resume.delete}
             </Button>
           </div>
           <p role="status">{saved ? copy.resume.saved : ""}</p>

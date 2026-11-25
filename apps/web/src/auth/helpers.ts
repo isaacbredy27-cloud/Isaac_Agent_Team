@@ -100,9 +100,9 @@ export function parseStubToken(token: string): { role: "super_admin"; aal: "aal2
   return { role: "super_admin", aal: "aal2", stepUpAt: Number(rest) };
 }
 
-/** Stub is on only when the flag is exactly '1' and the build mode is not 'production'. */
+/** Stub is on only when the flag is exactly '1' and the mode is 'development' or 'test'. Allow-list, deny by default. */
 export function isStubEnabled(flag: unknown, mode: unknown): boolean {
-  return flag === "1" && mode !== "production";
+  return flag === "1" && (mode === "development" || mode === "test");
 }
 
 /** Secret-key prefix, built at runtime so the CI secret scan of dist/ stays clean. */

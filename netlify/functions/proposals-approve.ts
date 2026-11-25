@@ -6,7 +6,7 @@ import { requireLiveUser, withAuth } from "./_lib/auth/index";
 import { error, json, readJson } from "./_lib/platform/http";
 import { audit } from "./_lib/console/audit";
 import { commitProposal, githubEnv } from "./_lib/console/github";
-import { ApproveRequestSchema, getProposal, updateProposal } from "./_lib/console/proposals";
+import { ApproveRequestSchema, MAX_FILE_BYTES, containsSecret, getProposal, updateProposal } from "./_lib/console/proposals";
 import { validatePath } from "./_lib/auth/paths";
 import { getAgent } from "./_lib/console/bundle";
 
@@ -25,7 +25,9 @@ export default withAuth(
     const found = await getProposal(id);
     if (!found) return error("not_found", 404);
     const p = found.proposal;
-    const log = (action: string, result: string) => audit({ route: ROUTE, action, sub: auth.userId, proposalId: id, agent: p.agent, result });
+    const stepUpAt = auth.amr[0]?.timestamp;
+    const log = (action: string, result: string) =>
+      audit({ route: ROUTE, action, sub: auth.userId, proposalId: id, agent: p.agent, result, details: { stepUpAt } });
 
     if (body.data.confirm !== p.id) {
       await log("approve", "confirm_mismatch");
@@ -38,6 +40,12 @@ export default withAuth(
     if (!agent || p.files.some((f) => !validatePath(f.path, agent.responsibilities).ok)) {
       await log("approve", "path_denied");
       return error("path_denied", 422);
+    }
+
+    // Re-scan content at approval time: the scanner or limits may be stricter than when the proposal was stored.
+    if (p.files.some((f) => f.after !== undefined && (containsSecret(f.after) || Buffer.byteLength(f.after, "utf8") > MAX_FILE_BYTES))) {
+      await log("approve", "content_blocked");
+      return error("content_blocked", 422);
     }
 
     const gh = githubEnv();
@@ -80,5 +88,5 @@ export default withAuth(
 export const config: Config = {
   path: "/api/proposals/:id/approve",
   method: "POST",
-  rateLimit: { windowLimit: 10, windowSize: 60, aggregateBy: ["ip", "domain"] },
+  rateLimit: { windowLimit: 5, windowSize: 60, aggregateBy: ["ip", "domain"] },
 };

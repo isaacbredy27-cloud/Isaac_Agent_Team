@@ -87,8 +87,12 @@ describe("e2e stub token", () => {
   });
   it("is never on in production mode", () => {
     expect(isStubEnabled("1", "production")).toBe(false);
-    expect(isStubEnabled("1", "e2e")).toBe(true);
     expect(isStubEnabled("1", "development")).toBe(true);
+    expect(isStubEnabled("1", "test")).toBe(true);
+    // Allow-list, not "anything but production": staging or custom modes stay off.
+    expect(isStubEnabled("1", "e2e")).toBe(false);
+    expect(isStubEnabled("1", "staging")).toBe(false);
+    expect(isStubEnabled("1", undefined)).toBe(false);
     expect(isStubEnabled("true", "development")).toBe(false);
     expect(isStubEnabled(undefined, "development")).toBe(false);
   });

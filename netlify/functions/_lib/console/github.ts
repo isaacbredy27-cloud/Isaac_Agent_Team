@@ -1,3 +1,5 @@
+import { hashSub } from "./audit";
+
 // GitHub REST via fetch (skill github-api, ADR 0001/0002). Token stays server-side and is never logged.
 export class GitHubError extends Error {
   constructor(public readonly status: number, message: string) {
@@ -72,8 +74,9 @@ export type CommitFile = { path: string; action: "create" | "update" | "delete";
 export type CommitInput = { id: string; agent: string; title: string; baseSha: string; files: CommitFile[]; approverSub: string };
 export type CommitResult = { status: "committed"; commitSha: string; commitUrl: string } | { status: "stale"; headSha: string };
 
+/** The trailer carries the hashed approver sub (security review), never the raw sub or email. */
 export const commitMessage = (p: Pick<CommitInput, "agent" | "title" | "id" | "approverSub">): string =>
-  `agent(${p.agent}): ${p.title.replace(/[\r\n]+/g, " ").trim()}\n\nProposal: #${p.id}\nApproved-by: ${p.approverSub}`;
+  `agent(${p.agent}): ${p.title.replace(/[\r\n]+/g, " ").trim()}\n\nProposal: #${p.id}\nApproved-by: ${hashSub(p.approverSub)}`;
 
 /** One atomic commit on main (ADR 0002): ref → base-SHA check → blobs → tree → commit → PATCH ref (force:false). Serial calls. */
 export async function commitProposal(cfg: GitHubEnv, p: CommitInput): Promise<CommitResult> {

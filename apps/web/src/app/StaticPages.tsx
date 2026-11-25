@@ -31,7 +31,7 @@ export function HowItWorksPage() {
           <tbody>
             {scoreWeights.map((w) => (
               <tr key={w.label}>
-                <th scope="row" style={{ textAlign: "left" }}>{w.label}</th>
+                <th scope="row" className="text-left">{w.label}</th>
                 <td>{w.points}</td>
               </tr>
             ))}

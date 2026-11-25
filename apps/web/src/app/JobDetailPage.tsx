@@ -92,7 +92,7 @@ export function JobDetailPage() {
       )}
       <section className="stack" aria-labelledby="desc-h">
         <h2 id="desc-h">{copy.detail.title}</h2>
-        <p style={{ whiteSpace: "pre-wrap" }}>{job.description}</p>
+        <p className="pre-wrap">{job.description}</p>
       </section>
     </article>
   );

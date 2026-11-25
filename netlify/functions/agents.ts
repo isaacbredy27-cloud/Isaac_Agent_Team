@@ -15,5 +15,5 @@ export default withAuth(
 export const config: Config = {
   path: "/api/agents",
   method: "GET",
-  rateLimit: { windowLimit: 60, windowSize: 60, aggregateBy: ["ip", "domain"] },
+  rateLimit: { windowLimit: 20, windowSize: 60, aggregateBy: ["ip", "domain"] },
 };

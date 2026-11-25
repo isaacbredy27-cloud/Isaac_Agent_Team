@@ -1,101 +1,107 @@
-// Auth screen copy in one object so it can be swapped for apps/web/src/content/copy.ts later.
-// Source: docs/design/ux/auth-flows.md (Wren). Never reveal whether an email has an account.
+// Auth screen copy. One source: copy.auth in apps/web/src/content/copy.ts (Wren).
+// This file only maps those keys to the shape the auth screens use.
+// Keys marked "local" have no entry there yet; Wren may move them into content/copy.ts.
+// Never reveal whether an email has an account.
+import { copy } from "../content/copy";
+
+const c = copy.auth;
 
 export const authCopy = {
-  loading: "Loading…",
-  orDivider: "or",
-  google: "Continue with Google",
-  emailLabel: "Email",
-  passwordLabel: "Password",
-  newPasswordLabel: "New password",
-  showPassword: "Show password",
-  hidePassword: "Hide password",
-  backToLogin: "Back to log in",
-  logOut: "Log out",
-  notConfigured: "Sign in is not set up yet.",
-  loggedOut: "You're logged out.",
+  loading: "Loading…", // local
+  orDivider: c.or,
+  google: c.google,
+  emailLabel: c.emailLabel,
+  passwordLabel: c.passwordLabel,
+  newPasswordLabel: "New password", // local
+  showPassword: c.showPassword,
+  hidePassword: c.hidePassword,
+  backToLogin: c.checkEmail.backToLogin,
+  logOut: c.logout.button,
+  notConfigured: "Sign in is not set up yet.", // local
+  loggedOut: c.logout.done,
 
   signIn: {
-    title: "Log in",
-    button: "Log in",
-    busy: "Logging in…",
-    forgot: "Forgot password?",
-    toSignUp: "New here? Create an account",
+    title: c.login.title,
+    button: c.login.button,
+    busy: c.login.loading,
+    forgot: c.login.forgot,
+    toSignUp: c.login.toSignup,
   },
   signUp: {
-    title: "Create your account",
-    button: "Create account",
-    busy: "Creating account…",
-    toSignIn: "Already have an account? Log in",
+    title: c.signup.title,
+    button: c.signup.button,
+    busy: c.signup.loading,
+    toSignIn: c.signup.toLogin,
   },
   checkEmail: {
-    title: "Check your email",
-    signUpBody: (email: string) => `If you can sign up with ${email}, we sent a link there. Open it to finish.`,
-    resetBody: (email: string) => `If ${email} has an account, we sent a link to reset your password. It can take a minute.`,
+    title: c.checkEmail.title,
+    signUpBody: c.checkEmail.signupBody,
+    resetBody: c.checkEmail.resetBody,
   },
   forgot: {
-    title: "Reset your password",
-    body: "Enter your email. We'll send you a link to set a new password.",
-    button: "Send reset link",
-    busy: "Sending…",
+    title: c.forgot.title,
+    body: c.forgot.body,
+    button: c.forgot.button,
+    busy: c.forgot.loading,
   },
   update: {
-    title: "Choose a new password",
-    button: "Save password",
-    busy: "Saving…",
-    saved: "Password saved. You're logged in.",
+    title: c.update.title,
+    button: c.update.button,
+    busy: c.update.loading,
+    saved: c.update.saved,
   },
   callback: {
-    busy: "Signing you in…",
+    busy: "Signing you in…", // local
   },
   mfaEnroll: {
-    title: "Set up your authenticator app",
-    scan: "Scan this code with your authenticator app.",
-    qrAlt: "QR code for your authenticator app",
-    manual: "Can't scan? Type this code in your app instead.",
-    copy: "Copy code",
-    copied: "Code copied.",
-    next: "Next",
-    verify: "Verify and turn on",
-    busy: "Checking…",
-    back: "Back",
-    doneTitle: "Your authenticator is on",
-    doneButton: "Continue",
+    title: c.mfaEnrol.scanTitle,
+    scan: c.mfaEnrol.scanBody,
+    qrAlt: c.mfaEnrol.qrAlt,
+    manual: c.mfaEnrol.manualLabel,
+    copy: c.mfaEnrol.copyCode,
+    copied: "Code copied.", // local
+    next: c.mfaEnrol.next,
+    verify: c.mfaEnrol.verify,
+    busy: c.mfaEnrol.checking,
+    back: "Back", // local
+    doneTitle: c.mfaEnrol.doneTitle,
+    doneButton: c.mfaEnrol.continue,
   },
   mfaChallenge: {
-    title: "Enter your code",
-    body: "Open your authenticator app. Type the 6-digit code.",
-    button: "Verify",
-    busy: "Checking…",
+    title: c.mfaChallenge.title,
+    body: c.mfaChallenge.body,
+    button: c.mfaChallenge.button,
+    busy: c.stepUp.checking,
   },
   code: {
-    label: "6-digit code",
-    hint: "Open your authenticator app. Type the code you see.",
+    label: c.mfaEnrol.codeLabel,
+    hint: c.mfaEnrol.codeHint,
   },
   stepUp: {
-    title: "Confirm it's you",
-    // UX draft also asks for the password. Step-up checks only a fresh TOTP (amr[0]), so the code is enough.
-    body: "Approving changes the live app. Enter the code from your authenticator app.",
-    button: "Confirm",
-    busy: "Checking…",
-    cancel: "Cancel",
+    title: c.stepUp.title,
+    // Code-only step-up (Wren confirmed): the Function checks a fresh TOTP at amr[0].
+    body: c.stepUp.body,
+    button: c.stepUp.confirm,
+    busy: c.stepUp.checking,
+    cancel: "Cancel", // local
   },
   notAvailable: {
-    title: "This page isn't available",
-    body: "Go back to your matches.",
-    link: "Go to matches",
+    title: c.notAvailable.title,
+    // Wren review item 16: the page is "jobs". content/copy.ts still says "matches"; Wren to align.
+    body: "Go back to your jobs.",
+    link: "Back to jobs",
   },
   error: {
-    credentials: "That email and password don't match. Try again or reset your password.",
-    rate: "Too many tries. Wait a minute and try again.",
-    generic: "Something went wrong on our side. Try again in a moment.",
-    offline: "You're offline. Connect to the internet and try again.",
-    email: "Enter an email like name@example.com.",
-    weakPassword: "Use a longer password with a mix of letters and numbers.",
-    linkExpired: "This link has expired. Ask for a new one.",
-    google: "We couldn't sign you in with Google. Try again or use your email.",
-    mfaCode: "That code didn't work. Wait for a new one and try again.",
-    sessionEnded: "Your session ended. Log in again.",
+    credentials: c.error.credentials,
+    rate: c.error.rate,
+    generic: c.error.generic,
+    offline: c.error.offline,
+    email: c.error.email,
+    weakPassword: c.update.weak,
+    linkExpired: c.error.linkExpired,
+    google: c.googleFlow.error,
+    mfaCode: c.error.mfaCode,
+    sessionEnded: c.mfaChallenge.sessionEnded,
   },
 } as const;
 

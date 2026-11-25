@@ -11,6 +11,7 @@ import { getAgent, type BundledAgent } from "./_lib/console/bundle";
 import { createGitHub, githubEnv } from "./_lib/console/github";
 import { prepareProposalFiles, saveNewProposal } from "./_lib/console/proposals";
 import { TOOLS, createToolRunner } from "./_lib/console/tools";
+import { addTokens, isOverBudget, usageTokens } from "./_lib/console/budget";
 
 const ROUTE = "/api/agents/chat";
 const MAX_ROUNDS = 8;
@@ -87,6 +88,11 @@ async function runClaude(
   const started = Date.now();
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
+    if (await isOverBudget(sub)) {
+      await audit({ route: ROUTE, action: "chat", sub, agent: agent.name, result: "budget_exceeded" });
+      send({ type: "error", error: "budget_exceeded" });
+      break;
+    }
     const stream = client.messages.stream(
       {
         model: agent.model,
@@ -100,6 +106,7 @@ async function runClaude(
     );
     stream.on("text", (text) => send({ type: "text", text }));
     const msg = await stream.finalMessage();
+    await addTokens(sub, usageTokens(msg.usage));
     messages.push({ role: "assistant", content: msg.content as Anthropic.ContentBlockParam[] });
 
     if (msg.stop_reason === "refusal") { send({ type: "error", error: "refusal" }); break; }

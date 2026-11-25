@@ -8,7 +8,7 @@ import { SECRET_KEY_PREFIX, isPublicConfig, isStubEnabled } from "./helpers";
 const url: unknown = import.meta.env.VITE_SUPABASE_URL;
 const publishableKey: unknown = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
-/** e2e stub: VITE_E2E_AUTH_STUB === '1' and a non-production build mode. Never on in production. */
+/** e2e stub: VITE_E2E_AUTH_STUB === '1' and mode 'development' or 'test'. Never on in production. */
 export const authStub: boolean = isStubEnabled(import.meta.env.VITE_E2E_AUTH_STUB, import.meta.env.MODE);
 
 /** False when env is missing (or looks like a secret key). The app still runs, with sign in off. */
