@@ -9,5 +9,24 @@
     "allowed": false,
     "termsReviewedAt": null
   },
-  "employers": []
+  "employers": [
+    {
+      "id": "nbcuniversal",
+      "name": "NBCUniversal",
+      "ats": "smartrecruiters",
+      "companyId": "NBCUniversal3",
+      "tier": 1,
+      "allowed": true,
+      "termsReviewedAt": "2026-11-25"
+    },
+    {
+      "id": "versant",
+      "name": "Versant",
+      "ats": "smartrecruiters",
+      "companyId": "Versant3",
+      "tier": 1,
+      "allowed": true,
+      "termsReviewedAt": "2026-11-25"
+    }
+  ]
 }

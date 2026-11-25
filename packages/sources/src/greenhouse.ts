@@ -69,7 +69,7 @@ export function isFinanceTitle(title: string): boolean {
   return FINANCE_TITLE.test(title);
 }
 
-function extractSkills(text: string): string[] {
+export function extractSkills(text: string): string[] {
   return SKILL_MATCHERS.filter((m) => m.re.test(text)).map((m) => m.id);
 }
 
@@ -111,7 +111,7 @@ export function normalizeGreenhouseBoard(body: unknown, token: string): Job[] {
   });
 }
 
-async function readCapped(res: Response): Promise<unknown> {
+export async function readCapped(res: Response): Promise<unknown> {
   const len = Number(res.headers.get("content-length"));
   if (Number.isFinite(len) && len > MAX_BODY_BYTES) throw new Error("greenhouse_too_large");
   if (!res.body) throw new Error("greenhouse_empty");

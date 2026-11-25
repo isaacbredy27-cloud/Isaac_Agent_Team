@@ -2,6 +2,7 @@ import type { Job } from "../../schemas/src/index";
 import registry from "../../../data/registry/employers.json";
 import { BOARD_TOKEN_RE, fetchGreenhouse } from "./greenhouse";
 import { loadSeed } from "./seed";
+import { COMPANY_ID_RE, fetchSmartRecruiters } from "./smartrecruiters";
 
 export { loadSeed } from "./seed";
 export { fetchGreenhouse, normalizeGreenhouse, normalizeGreenhouseBoard } from "./greenhouse";
@@ -16,7 +17,7 @@ export type GetJobsOptions = {
 
 export type GetJobsResult = { jobs: Job[]; source: "seed" | "mixed" };
 
-type Employer = { boardToken?: string; ats?: string; tier?: number; allowed?: boolean; termsReviewedAt?: string | null };
+type Employer = { name?: string; companyId?: string; boardToken?: string; ats?: string; tier?: number; allowed?: boolean; termsReviewedAt?: string | null };
 
 const POLL_MS = 2 * 60 * 60 * 1000; // ADR 0003: at most once per 2 hours per board
 const cache = new Map<string, { at: number; jobs: Job[] }>();
@@ -55,6 +56,33 @@ async function greenhouseJobs(now: number, fetchImpl?: typeof fetch): Promise<Jo
   return out;
 }
 
+function smartRecruitersEmployers(): { id: string; name: string }[] {
+  const list = (registry as { employers?: Employer[] }).employers ?? [];
+  return list
+    .filter((e) => e.ats === "smartrecruiters" && e.tier === 1 && e.allowed === true && isDate(e.termsReviewedAt) && typeof e.companyId === "string" && COMPANY_ID_RE.test(e.companyId))
+    .map((e) => ({ id: e.companyId as string, name: e.name ?? (e.companyId as string) }));
+}
+
+async function smartRecruitersJobs(now: number, fetchImpl?: typeof fetch): Promise<Job[]> {
+  const out: Job[] = [];
+  for (const { id, name } of smartRecruitersEmployers()) {
+    const key = `sr:${id}`;
+    const hit = cache.get(key);
+    if (hit && now - hit.at < POLL_MS) {
+      out.push(...hit.jobs);
+      continue;
+    }
+    try {
+      const jobs = await fetchSmartRecruiters(id, name, fetchImpl);
+      cache.set(key, { at: now, jobs });
+      out.push(...jobs);
+    } catch {
+      if (hit) out.push(...hit.jobs);
+    }
+  }
+  return out;
+}
+
 const normKey = (j: Job) =>
   `${j.company}|${j.title}|${j.location}`.toLowerCase().replace(/[^a-z0-9|]+/g, " ").trim();
 
@@ -77,6 +105,14 @@ export async function getJobs(opts: GetJobsOptions = {}): Promise<GetJobsResult>
 
   if (process.env.JOBS_GREENHOUSE === "1") {
     const live = await greenhouseJobs(now.getTime(), opts.fetchImpl);
+    if (live.length > 0) {
+      jobs = jobs.concat(live);
+      source = "mixed";
+    }
+  }
+
+  if (process.env.JOBS_SMARTRECRUITERS === "1") {
+    const live = await smartRecruitersJobs(now.getTime(), opts.fetchImpl);
     if (live.length > 0) {
       jobs = jobs.concat(live);
       source = "mixed";
