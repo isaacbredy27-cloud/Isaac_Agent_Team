@@ -19,6 +19,7 @@ Finance Match Orlando is an installable web app (PWA) on Netlify. Users upload a
 | 9 | [security.md](security.md) | Auth, roles, secrets, allow-lists, injection, retention |
 | 10 | [long-running-jobs.md](long-running-jobs.md) | Background work, queue, retries, progress |
 | 11 | [testing-and-accessibility.md](testing-and-accessibility.md) | Test plan, WCAG 2.2 AA, performance budgets |
+| 12 | [expert-roster.md](expert-roster.md) | The 17-agent team: roles, skills matrix, RACI, escalation, agent lifecycle and standards |
 
 ## Architecture decisions
 
