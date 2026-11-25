@@ -12,7 +12,7 @@ Research date: 2026-11-24. Goal: a mobile-first dashboard that shows which Orlan
 | 4 | Job detail | Score breakdown, explanation, apply link |
 | 5 | Saved | Saved opportunities, status tracking |
 | 6 | Skill gaps | Aggregate gaps across top matches |
-| 7 | Agent Console (admin) | See `agent-console.md` |
+| 7 | Agent Console (`super_admin` with MFA only; ADR 0006) | See `agent-console.md` |
 
 Bottom tab bar on mobile: **Matches · Saved · Skill gaps · Profile**. Side nav on ≥ 1024 px.
 

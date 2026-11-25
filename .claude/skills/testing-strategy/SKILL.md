@@ -44,6 +44,17 @@ lint → typecheck → unit → integration → build + secret scan → e2e + ax
 - Never skip, disable or quarantine a test to go green; fix or escalate.
 - A bug fix includes a test that fails without the fix.
 
+## Auth tests (Supabase Auth, ADR 0006)
+Synthetic users in a test Supabase project only. Required before the Agent Console ships:
+- 401 without a token, with an expired token, wrong `alg` or wrong `iss`.
+- 403 `forbidden` for `user` on every `agents-*` and `proposals-*` route (same body).
+- 403 `mfa_required` for an aal1 `super_admin`; 403 `step_up_required` when the TOTP is older than 600 s.
+- A role in `user_metadata` or the request body grants nothing.
+- RLS: user A cannot read B's `profiles` row; `authenticated` cannot insert, update or delete `profiles`.
+- Sign-up creates a `profiles` row with role `user`; deleting the auth user cascades.
+- e2e: sign up, log in, log out, forgot password, Continue with Google (mocked with `page.route`).
+- Secret scan fails on `sb_secret_` and `service_role` JWTs.
+
 ## Definition of done
 Tests added · coverage holds · axe 0 · keyboard pass · docs updated · ADR if a decision changed.
 

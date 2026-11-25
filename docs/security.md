@@ -1,6 +1,6 @@
 # Security
 
-Research date: 2026-11-24. Updated 2026-11-25 for the decisions in [ADR 0001](adr/0001-github-fine-grained-pat-single-repo.md), [ADR 0002](adr/0002-commit-approved-changes-to-main.md), [ADR 0003](adr/0003-netlify-free-plan.md) and [ADR 0004](adr/0004-resume-confidentiality.md). Threat model, controls and acceptance criteria. This is engineering guidance, not legal advice.
+Research date: 2026-11-24. Updated 2026-11-25 for the decisions in [ADR 0001](adr/0001-github-fine-grained-pat-single-repo.md), [ADR 0002](adr/0002-commit-approved-changes-to-main.md), [ADR 0003](adr/0003-netlify-free-plan.md) [ADR 0004](adr/0004-resume-confidentiality.md) and [ADR 0006](adr/0006-supabase-auth.md) (proposed). Supabase Auth design: [security/supabase-auth.md](security/supabase-auth.md). Threat model, controls and acceptance criteria. This is engineering guidance, not legal advice.
 
 Owners: `security-expert` (skills `security-architecture`, `authentication`, `authorization`, `secrets-management`, `rate-limiting`, `prompt-injection-defense`, `audit-logging`) and `privacy-compliance-specialist` (skill `privacy-and-data-protection`).
 
@@ -11,43 +11,45 @@ Owners: `security-expert` (skills `security-architecture`, `authentication`, `au
 | Resumes and profiles (PII) | Data leak, over-retention | High (privacy, breach notice duties) |
 | `ANTHROPIC_API_KEY` | Theft, abuse | High (spend) |
 | `GITHUB_TOKEN` | Theft; malicious commits | Critical (code integrity) |
-| Admin accounts | Takeover | Critical (can approve commits) |
+| `super_admin` accounts | Takeover | Critical (can approve commits) |
+| Supabase secret / `service_role` key | Would bypass RLS if it existed | Critical (banned; never issued) |
+| `profiles.role` | Self-promotion | Critical (can approve commits) |
 | Agent console | Prompt injection → bad proposals | High |
 | Job ingestion | Hostile page content (injection, XSS) | Medium |
 | Claude budget | Abuse via public endpoints | Medium–High |
 
 ## 2. Authentication and roles
 
-### 2.1 Options
+Decision: **Supabase Auth** ([ADR 0006](adr/0006-supabase-auth.md), proposed). Full design: [security/supabase-auth.md](security/supabase-auth.md). Auth0 and Netlify Identity were considered and dropped (see ADR 0006).
 
-| Option | Pros | Cons |
-|---|---|---|
-| Netlify Identity | Built in. Invite-only registration. External logins (Google, GitHub, GitLab, Bitbucket). Role-based redirects. | No MFA. Netlify announced deprecation in 2025, then reversed it on 2026-02-19 (per a community summary of Netlify's edited blog post). Git Gateway remains deprecated. |
-| Auth0 (Netlify extension) | MFA, enterprise SSO, many providers, RBAC | Extra vendor; free-tier limits |
-| Own password auth | Full control | You own hashing, reset, lockout, MFA. Most risk. |
+### 2.1 Methods
 
-### 2.2 Recommendation
+- Email and password, with email confirmation on. Sign up, log in, log out, forgot password.
+- Continue with Google (`signInWithOAuth`, provider `google`, PKCE).
+- Browser and Functions use only `SUPABASE_URL` and the publishable key. Secret (`sb_secret_…`) and legacy `service_role` keys are banned. They bypass RLS.
 
-- **Admins (can approve commits): require MFA.** Use the Auth0 extension, or another OIDC provider with MFA.
-- **Job seekers:** Netlify Identity or the same Auth0 tenant. One provider is simpler. Pick Auth0 if admins need it anyway.
-- Verify the JWT in every function (issuer, audience, expiry, signature via JWKS). Never trust a role sent by the client.
+### 2.2 Verify on every request
+
+- Every Function: Bearer token → `getClaims` (ES256, local JWKS) → check `alg`, `iss`, `role = authenticated`, `exp`.
+- Never use `getSession()` on the server. Fail closed (503) if Supabase is unreachable.
+- Read the role from `public.profiles` through a per-request client that carries the user's token, so RLS applies. Never from `user_metadata`.
 
 ### 2.3 Roles
 
 | Role | Can |
 |---|---|
-| `user` | Upload resume, view matches, save jobs, delete own data |
-| `viewer` | All `user` rights + read Agent Console and proposals |
-| `admin` | All `viewer` rights + chat with agents, create proposals, approve/reject, manage employer registry |
-| `owner` | All `admin` rights + manage roles, rotate secrets runbook |
+| `user` (default) | Upload resume, view matches, save jobs, delete own data |
+| `super_admin` | All `user` rights + Agents page, agent chat, proposals, approve/reject, employer registry |
 
-Enforce in a single `requireRole(req, role)` helper. Deny by default.
+No role can read another user's resume or profile (ADR 0004). Helpers: `requireUser`, `requireRole`, `requireAal2`, `requireStepUp` (skill `authorization`). Deny by default.
 
-### 2.4 Password-protected administration
+Promotion: manual SQL by the project lead in the Supabase dashboard. A trigger logs it to `private.role_changes`; the runbook mirrors it to the audit log. No API can change a role. RLS lets people read only their own `profiles` row and has no write policies.
 
-- Admin routes (`/admin/*`, `/api/agents/*`, `/api/proposals/*`) require `admin` role and MFA claim (`amr` includes `mfa`).
-- Approval requires a **step-up**: re-authentication within 10 minutes.
-- Optional extra layer: Netlify site password protection on the admin path for staging.
+### 2.4 Administration
+
+- `/api/agents/*` and `/api/proposals/*` need `super_admin` and `aal2` (TOTP MFA).
+- Approve and Revert also need a step-up: `amr[0].method = "totp"` within 600 s, else 403 `step_up_required`. This meets ADR 0002's "re-authentication within 10 minutes".
+- Deploy Previews have no login. The Supabase variables are set for Production only.
 
 ## 3. Secrets
 
@@ -55,6 +57,7 @@ Enforce in a single `requireRole(req, role)` helper. Deny by default.
 - **Free plan (ADR 0003):** variable *scopes* are a Pro feature, so secrets are also visible to the build step. Never reference a secret in client code; read secrets only inside function handlers.
 - Different values per deploy context. Deploy Previews get no `GITHUB_TOKEN` and a low-limit Claude key.
 - Never prefix secrets with `VITE_` or any client-exposed prefix. CI fails the build if `dist/` contains `sk-ant-`, `github_pat_`, `ghp_`, or `-----BEGIN`.
+- Public, not secret: `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (Production context only). The Google OAuth client secret lives only in the Supabase dashboard. CI also fails on `sb_secret_` and on `service_role` JWTs.
 - Rotation: every 90 days, and at once after any suspected leak. Keep a runbook.
 
 ## 4. GitHub fine-grained token
@@ -99,9 +102,11 @@ Controls:
 | Layer | Control |
 |---|---|
 | Netlify edge | `config.rateLimit` per function, aggregated by IP and domain (e.g., upload: 5/min; chat: 20/min; jobs: 120/min) |
-| App | Per-user daily Claude token budget in Blobs (e.g., users 200k tokens/day; admins 2M) |
+| App | Per-user daily Claude token budget in Blobs (e.g., users 200k tokens/day; `super_admin` 2M) |
 | App | Max 3 resume uploads per user per day |
 | Anthropic Console | Workspace spend limit set below the org tier cap |
+| Supabase Auth | Vendor limits: sign-in 30 per 5 min; emails 2/hour on built-in SMTP (custom SMTP before launch); MFA verify 15/min |
+| Netlify edge | Approve 5/min; account routes 5/min |
 | Bot defense | Turnstile or hCaptcha on signup and upload if abuse appears |
 | Netlify WAF / traffic rules | Enable if on a plan that includes Advanced Web Security |
 
@@ -112,12 +117,12 @@ Return `429` with `Retry-After`. Show a friendly message.
 Append-only events in Blobs store `audit`, one object per event (`log/{yyyy-mm-dd}/{ulid}.json`):
 
 ```json
-{ "ts": "2026-11-24T18:03:11Z", "actor": "user_123", "role": "admin",
+{ "ts": "2026-11-24T18:03:11Z", "actor": "u_9f2c…", "role": "super_admin",
   "action": "proposal.approve", "target": "proposal/7", "ip": "203.0.113.4",
   "details": { "commitSha": "abc123", "files": 2 } }
 ```
 
-Log: sign-in, role change, resume upload/delete, profile export, agent chat start, proposal create/approve/reject/commit, secret-dependent failures, rate-limit hits.
+Log: sign-in, role change (mirrored from `private.role_changes`), auth denials on `super_admin` routes, MFA and step-up failures, resume upload/delete, account delete request and completion, profile export, agent chat start, proposal create/approve/reject/commit, secret-dependent failures, rate-limit hits. The actor is the hashed Supabase user ID, never the email or token.
 
 - Never log resume text, tokens or full prompts.
 - Keep audit logs 1 year.
@@ -153,17 +158,25 @@ Log: sign-in, role change, resume upload/delete, profile export, agent chat star
 | Agent chats | 90 days |
 | Proposals | Indefinitely (they explain repo history) |
 | Audit logs | 1 year |
+| Email, password hash, Google identity ID (Supabase `auth.users`, `auth.identities`) | Until account deletion; proposed 12 months inactive |
+| MFA factor (`super_admin`) | Until factor removed or account deleted |
+| `profiles` (`id`, `role`, `created_at`) | Cascade-deleted with `auth.users` |
+| `private.role_changes` | 1 year (matches audit log) |
+| Supabase auth audit log | 24 hours (Free plan; https://supabase.com/pricing, read 2026-11-25) |
+| Google name and avatar | Not stored by us |
 
 - "Delete my data" button removes profile, matches, saved jobs and kept files at once. Log the deletion (without content). Worked example: `knowledge/privacy-compliance-specialist/examples/delete-my-data.mjs`.
+- Account deletion: delete Blobs data first (Function), then the project lead deletes the user in Supabase → Authentication → Users (runbook). No secret key. Details: [privacy/supabase-auth.md](privacy/supabase-auth.md).
+- No resume data is ever stored in Supabase (ADR 0004).
 - A daily scheduled function enforces retention.
 - Breach response: Florida's Information Protection Act (s. 501.171, F.S.) sets notice duties for breaches of personal information. Have counsel confirm scope and timelines before launch.
 
 ## 12. Browser hardening
 
-- Strict CSP (see `netlify-architecture.md` §8). No inline scripts. `connect-src 'self'`.
+- Strict CSP (see `netlify-architecture.md` §8). No inline scripts. `connect-src 'self'` plus `SUPABASE_URL`.
 - `frame-ancestors 'none'`.
-- Session tokens in memory or `HttpOnly; Secure; SameSite=Lax` cookies. Not `localStorage`.
-- CSRF: same-site cookies plus an `Origin` check on state-changing routes.
+- Supabase session in supabase-js browser storage: an accepted exception under strict CSP. See [security/supabase-auth.md](security/supabase-auth.md) §4.4.
+- CSRF: Bearer tokens plus an `Origin` check on state-changing routes.
 - Dependency scanning: `npm audit` and GitHub Dependabot alerts. Lockfile committed.
 
 ## 13. Monitoring
@@ -171,15 +184,17 @@ Log: sign-in, role change, resume upload/delete, profile export, agent chat star
 - Netlify function logs: errors, 4xx/5xx spikes, rate-limit blocks.
 - Anthropic usage: daily spend alert at 50% and 80% of budget.
 - GitHub: alert on any push to `main` not tied to an approved proposal or human PR.
-- Weekly review of audit log for admin actions.
+- Weekly review of audit log for `super_admin` actions. Reconcile `private.role_changes` with `auth.role_change` events.
 - Uptime check on `/api/health`.
 
 ## 14. Acceptance criteria
 
 - Build fails if a secret pattern appears in client assets.
-- Every personal API route rejects missing or invalid JWTs (automated tests).
-- A `user` cannot reach any admin route (403 tests).
-- Approval without recent re-auth fails.
+- Every personal API route rejects missing, expired, wrong-`alg` or wrong-`iss` tokens (401).
+- A `user` gets 403 on every `super_admin` route; an aal1 `super_admin` gets 403 `mfa_required`.
+- Approve without a TOTP in the last 600 s fails with 403 `step_up_required`.
+- RLS: user A cannot read B's profile; `authenticated` cannot update `role`.
+- No `sb_secret_` or `service_role` value in the repo, `dist/` or proposals.
 - A proposal touching a denied path never reaches storage.
 - "Delete my data" removes all user keys from every store (integration test lists keys before and after).
 - Rate limits return 429 with `Retry-After`.
@@ -191,8 +206,12 @@ Log: sign-in, role change, resume upload/delete, profile export, agent chat star
 - GitHub REST, repository contents and rate limits. https://docs.github.com/en/rest/repos/contents · https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api
 - Netlify, Environment variables overview (scopes, secret values, audit log, limits). https://docs.netlify.com/build/environment-variables/overview/
 - Netlify, Rate limiting. https://docs.netlify.com/manage/security/secure-access-to-sites/rate-limiting/
-- Netlify Identity overview. https://docs.netlify.com/manage/security/secure-access-to-sites/identity/overview/
-- Netlify Support Forums community summary, "Netlify Identity is staying (Feb 2026 reversal)". https://answers.netlify.com/t/netlify-identity-is-staying-feb-2026-reversal-what-changed-whos-affected-and-how-to-proceed/162733
+- Supabase API keys. https://supabase.com/docs/guides/getting-started/api-keys (read 2026-11-25)
+- Supabase JWTs and signing keys. https://supabase.com/docs/guides/auth/jwts · https://supabase.com/docs/guides/auth/signing-keys (read 2026-11-25)
+- supabase-js `getClaims`. https://supabase.com/docs/reference/javascript/auth-getclaims (read 2026-11-25)
+- Supabase MFA. https://supabase.com/docs/guides/auth/auth-mfa (read 2026-11-25)
+- Supabase Row Level Security. https://supabase.com/docs/guides/database/postgres/row-level-security (read 2026-11-25)
+- Supabase Auth rate limits. https://supabase.com/docs/guides/auth/rate-limits (read 2026-11-25)
 - Netlify Blobs (encryption at rest). https://docs.netlify.com/build/data-and-storage/netlify-blobs/
 - mammoth.js security notes. https://github.com/mwilliamson/mammoth.js
 - Claude API rate limits and refusal handling (Anthropic docs).

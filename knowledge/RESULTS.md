@@ -1,6 +1,6 @@
 # Example run results
 
-Run: 2026-11-25T00:53:50.395Z · Node v22.23.5
+Run: 2026-11-25T02:03:26.828Z · Node v22.23.5
 
 | Agent | Example | Result | Last line of output |
 |---|---|---|---|
@@ -33,7 +33,7 @@ Run: 2026-11-25T00:53:50.395Z · Node v22.23.5
 | resume-analysis-expert | experience-math.mjs | PASS | OK: overlapping jobs merged; relevance-weighted finance years computed deterministically |
 | resume-analysis-expert | extract-text.mjs | PASS | OK: unpdf and mammoth extracted the same key facts from synthetic PDF and DOCX |
 | security-expert | profile-encryption.mjs | PASS | OK: AES-256-GCM round-trip works; tampering detected by the auth tag |
-| security-expert | secret-scan.mjs | PASS | OK: scanner flags Anthropic keys, GitHub PATs, private keys and build hooks; ignores clean code |
+| security-expert | secret-scan.mjs | PASS | OK: scanner flags Anthropic keys, GitHub PATs, private keys, build hooks and Supabase secret keys; ignores clean code and publishable keys |
 | security-expert | upload-validator.mjs | PASS | OK: 2 valid uploads accepted; 7 attacks rejected (double ext, null byte, spoofed type, bad zip, NTFS stream, oversize, legacy .doc) |
 | software-architect | boundary-check.mjs | PASS | OK: pure scoring and client/server split enforced; functions may use the SDK and secrets |
 | supabase-auth-engineer | profiles-rls-check.mjs | PASS | OK: profiles-rls.sql passes static RLS checks; 6 broken variants are caught |

@@ -4,7 +4,7 @@ description: Rate limits and budgets — Netlify code-based rateLimit config (wi
 metadata:
   owner: security-expert
   backups: [netlify-engineer, ai-systems-engineer]
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Rate Limiting
@@ -37,11 +37,22 @@ export const config: Config = {
 | `/api/agents/chat` | 20/min/IP |
 | `/api/match/*` | 60/min/IP |
 | `/api/jobs` | 120/min/IP (CDN cached) |
+| `/api/agents/*` (`super_admin` + aal2) | 20/min/IP |
+| `/api/proposals/*/approve` | 5/min/IP |
+| `/api/account/*` | 5/min/IP |
 
 ## App budgets
-- Claude tokens per user per day: users 200k, admins 2M (Blobs `ratelimit` store, strong consistency).
+- Claude tokens per user per day: users 200k, `super_admin` 2M (Blobs `ratelimit` store, strong consistency).
 - Anthropic Console workspace spend limit below org cap.
 - Free-plan credits: CDN caching + 2-hour polling (ADR 0003).
+
+## Supabase Auth limits (read 2026-11-25)
+Source: https://supabase.com/docs/guides/auth/rate-limits
+- Emails on built-in SMTP: 2/hour. Custom SMTP before launch (project lead decision).
+- Sign up/sign in 30 per 5 min; token refresh 150 per 5 min; verify 30 per 5 min; OTP 60 s per user.
+- MFA challenge/verify: 15/min, not configurable.
+- Log 401s to function logs; audit 403s on `super_admin` routes.
+- Netlify allows 2 rulesets per project (to verify with netlify-engineer); share rules across routes if needed.
 
 ## Upstream limits
 - Claude: 429 with `retry-after`; Tier 1 Opus 5.5 4,000 RPM.
@@ -66,3 +77,4 @@ export const config: Config = {
 ## References
 - https://docs.netlify.com/manage/security/secure-access-to-sites/rate-limiting/
 - https://platform.claude.com/docs/en/api/rate-limits
+- https://supabase.com/docs/guides/auth/rate-limits (read 2026-11-25)

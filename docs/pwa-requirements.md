@@ -142,7 +142,7 @@ Consider Capacitor when one of these becomes a firm requirement:
 - App Store / Play Store discovery is a growth channel.
 - Reliable background job alerts on iOS outside Home Screen install.
 - Native file pickers from cloud drives beyond what the web file input offers.
-- Biometric login (Face ID) for the admin console.
+- Biometric login (Face ID) for the Agent Console (`super_admin`).
 - Enterprise distribution (MDM).
 
 Costs of Capacitor: store review, Apple developer fee, two release pipelines, and App Store rules on apps that are "just a website". Recommendation: **ship PWA first, revisit after 3 months of usage data.**

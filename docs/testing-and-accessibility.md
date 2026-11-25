@@ -51,8 +51,8 @@ Critical journeys:
 3. Open a job; see score bars, gates, explanation; click Apply opens employer URL in new tab.
 4. Save a job; go offline (`context.setOffline(true)`); saved list still shows.
 5. Install flow: Chromium installability errors empty; iOS instructions sheet appears in WebKit when not standalone.
-6. Admin: open Agent Console, chat (Claude mocked), receive proposal, review diff, approve (GitHub mocked).
-7. User cannot open admin routes.
+6. `super_admin` with MFA (aal2): open Agent Console, chat (Claude mocked), receive proposal, review diff, pass step-up, approve (GitHub mocked).
+7. A `user`, or a `super_admin` without aal2, cannot open Agent Console routes (403). No token gives 401 (ADR 0006).
 8. Delete my data.
 
 Device matrix (emulated in CI):

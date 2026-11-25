@@ -111,7 +111,7 @@ Rules:
 | Job source 429/503 | Yes | Back off; skip source for this run after 3 failures |
 | Netlify timeout (killed) | Yes | Lease expires; next run resumes from checkpoint |
 
-- **Dead letters:** after `maxAttempts`, status `failed`. Admin page lists failed tasks with a "Retry" button.
+- **Dead letters:** after `maxAttempts`, status `failed`. A `super_admin`-only page lists failed tasks with a "Retry" button.
 - **Reaper:** the hourly scheduled function finds tasks `running` with an expired lease and re-enqueues them.
 
 ## 7. Scheduled fan-out
@@ -153,7 +153,7 @@ Options to evaluate then: a managed queue (e.g., Upstash QStash), or a workflow 
 
 - Killing a background run mid-way and letting Netlify retry produces no duplicate jobs, proposals or commits.
 - Every task shows progress within 5 s of starting.
-- A task that fails 3 times appears in the admin failed list with an error code.
+- A task that fails 3 times appears in the `super_admin` failed-task list with an error code.
 - The scheduled function finishes in < 10 s with 100 employers registered.
 - Requests to background functions without the internal token get 401.
 

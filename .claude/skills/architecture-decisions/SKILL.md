@@ -1,10 +1,10 @@
 ---
 name: architecture-decisions
-description: Binding project decisions every agent must follow — ADR 0001 fine-grained GitHub PAT for one repo (Contents RW only), ADR 0002 approved changes commit directly to main, ADR 0003 Netlify Free plan (300 credits, overage pauses all projects), ADR 0004 resumes never public and only for matching, ADR 0005 orchestrator hub with skills-first agents. Use on every task; preloaded into all agents.
+description: Binding project decisions every agent must follow — ADR 0001 fine-grained GitHub PAT for one repo (Contents RW only), ADR 0002 approved changes commit directly to main, ADR 0003 Netlify Free plan (300 credits, overage pauses all projects), ADR 0004 resumes never public and only for matching, ADR 0005 orchestrator hub with skills-first agents, ADR 0006 (proposed) Supabase Auth with profiles roles. Use on every task; preloaded into all agents.
 metadata:
   owner: software-architect
   backups: [orchestrator, security-expert]
-  version: 1.0.0
+  version: 1.1.0
 ---
 
 # Architecture Decisions (binding)
@@ -16,6 +16,7 @@ metadata:
 | 0003 | **Netlify Free plan** (300 credits/month; overage pauses every project; no env scopes; 24 h logs) | Cache aggressively, poll every 2 h, never expose secrets to client builds, persist logs to Blobs |
 | 0004 | **Resumes never public; used only for matching** | No public URLs, no caching, no logs, no agent access, raw file discarded by default |
 | 0005 | **Orchestrator hub; skills-first; per-agent knowledge** | Specialists don't contact each other; reuse skills; read your knowledge folder first |
+| 0006 (proposed) | **Supabase Auth**; roles `user` / `super_admin` in `public.profiles` under RLS; publishable key only | Every Function checks token + role per request; `super_admin` needs MFA (aal2); Approve needs TOTP step-up ≤ 600 s; never a secret key; no resume data in Supabase |
 
 Full text: `docs/adr/`. To change a rule: propose a new ADR through the orchestrator; only the project lead approves.
 ## Purpose
@@ -27,7 +28,7 @@ Give every agent the binding project decisions so no task contradicts them.
 
 ## Inputs → Outputs
 - Inputs: The task at hand.
-- Outputs: A plan that complies with ADRs 0001–0005, or an escalation proposing a new ADR.
+- Outputs: A plan that complies with ADRs 0001–0006, or an escalation proposing a new ADR.
 
 ## Best practices
 - Cite the ADR number when a rule shapes your work
@@ -47,3 +48,4 @@ Give every agent the binding project decisions so no task contradicts them.
 - docs/adr/0003-netlify-free-plan.md
 - docs/adr/0004-resume-confidentiality.md
 - docs/adr/0005-agent-ecosystem.md
+- docs/adr/0006-supabase-auth.md

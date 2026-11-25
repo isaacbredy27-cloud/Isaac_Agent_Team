@@ -673,32 +673,34 @@ Solid arrows carry work products. Dotted arrows are reviews, vetoes, or agent bu
 
 **R** responsible (does the work) · **A** accountable (one per row; signs off) · **C** consulted · **I** informed. PL = human project lead.
 
-| Activity | PL | ORC | AGB | ARC | FIN | RES | MAT | AIS | JDI | UI | UX | PWA | A11Y | NET | ACE | SEC | PRV | QA |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Product scope and roadmap | A | R | I | C | C | I | C | I | I | I | C | I | I | I | I | C | C | I |
-| System architecture and ADRs | I | C | I | A/R | I | C | C | C | C | I | I | C | I | C | C | C | I | C |
-| Agent definitions in `.claude/agents` | A | C | R | C | I | I | I | C | I | I | I | I | I | I | C | C | I | C |
-| Market research and taxonomy content | I | I | I | I | A/R | C | C | C | C | I | C | I | I | I | I | I | I | I |
-| Job source connectors | I | I | I | C | C | I | I | C | A/R | I | I | I | I | C | I | C | C | C |
-| Source terms and robots review | I | I | I | I | I | I | I | I | C | I | I | I | I | I | I | C | A/R | I |
-| Resume parsing pipeline | I | I | I | C | C | A/R | C | C | I | I | C | I | I | C | I | C | C | C |
-| Extraction prompts and LLM evals | I | I | C | C | C | C | C | A/R | C | I | I | I | I | I | C | C | I | C |
-| Scoring algorithm and weights | C | I | I | C | C | C | A/R | C | I | I | C | I | I | I | I | I | C | C |
-| Explanation engine | I | I | I | C | C | I | C | A/R | I | I | C | C | I | I | I | C | I | C |
-| Visual design system | C | I | I | I | I | I | I | I | I | A/R | C | C | C | I | I | I | I | I |
-| UX flows, IA and copy | C | I | I | I | C | C | C | I | I | C | A/R | C | C | I | C | I | C | I |
-| PWA shell, service worker, front end | I | I | I | C | I | I | I | I | I | C | C | A/R | C | C | I | C | I | C |
-| Functions infra, Blobs, deploys, env vars | I | I | I | C | I | I | I | I | C | I | I | C | I | A/R | C | C | I | C |
-| Authentication and RBAC | C | I | I | C | I | I | I | I | I | I | C | C | I | C | C | A/R | C | C |
-| Agent Console chat and proposals | I | I | C | C | I | I | I | C | I | I | C | C | C | C | A/R | C | I | C |
-| Approving an agent proposal for commit | A/R | I | I | C | I | I | I | I | I | I | I | I | I | I | C | C | I | I |
-| Accessibility conformance | I | I | I | I | I | I | I | I | I | C | C | R | A | I | R | I | I | R |
-| Privacy, retention, consent | C | I | I | C | I | C | C | I | C | I | C | I | I | R | I | C | A | C |
-| Test strategy and release gate | C | C | I | C | I | I | I | C | I | I | I | C | C | C | C | C | C | A/R |
-| Release go/no-go | A | R | I | C | I | I | I | I | I | I | I | I | C | C | I | C | C | C |
-| Production monitoring and incidents | I | I | I | C | I | I | I | C | C | I | I | C | I | A/R | C | C | C | I |
-| Claude cost and budget | A | I | I | I | I | I | I | R | I | I | I | I | I | C | C | C | I | I |
-| Security review and secrets | I | I | I | C | I | I | I | C | I | I | I | I | I | C | C | A/R | C | I |
+| Activity | PL | ORC | AGB | ARC | FIN | RES | MAT | AIS | JDI | UI | UX | PWA | A11Y | NET | ACE | SEC | SAU | PRV | QA |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Product scope and roadmap | A | R | I | C | C | I | C | I | I | I | C | I | I | I | I | C | I | C | I |
+| System architecture and ADRs | I | C | I | A/R | I | C | C | C | C | I | I | C | I | C | C | C | C | I | C |
+| Agent definitions in `.claude/agents` | A | C | R | C | I | I | I | C | I | I | I | I | I | I | C | C | I | I | C |
+| Market research and taxonomy content | I | I | I | I | A/R | C | C | C | C | I | C | I | I | I | I | I | I | I | I |
+| Job source connectors | I | I | I | C | C | I | I | C | A/R | I | I | I | I | C | I | C | I | C | C |
+| Source terms and robots review | I | I | I | I | I | I | I | I | C | I | I | I | I | I | I | C | I | A/R | I |
+| Resume parsing pipeline | I | I | I | C | C | A/R | C | C | I | I | C | I | I | C | I | C | I | C | C |
+| Extraction prompts and LLM evals | I | I | C | C | C | C | C | A/R | C | I | I | I | I | I | C | C | I | I | C |
+| Scoring algorithm and weights | C | I | I | C | C | C | A/R | C | I | I | C | I | I | I | I | I | I | C | C |
+| Explanation engine | I | I | I | C | C | I | C | A/R | I | I | C | C | I | I | I | C | I | I | C |
+| Visual design system | C | I | I | I | I | I | I | I | I | A/R | C | C | C | I | I | I | I | I | I |
+| UX flows, IA and copy | C | I | I | I | C | C | C | I | I | C | A/R | C | C | I | C | I | C | C | I |
+| PWA shell, service worker, front end | I | I | I | C | I | I | I | I | I | C | C | A/R | C | C | I | C | C | I | C |
+| Functions infra, Blobs, deploys, env vars | I | I | I | C | I | I | I | I | C | I | I | C | I | A/R | C | C | C | I | C |
+| Authentication and RBAC (Function-side checks, role model) | C | I | I | C | I | I | I | I | I | I | C | C | I | C | C | A/R | R | C | C |
+| Supabase project, `profiles`, RLS, auth screens and MFA flows | C | I | I | C | I | I | I | I | I | C | C | C | C | C | C | C | A/R | C | C |
+| Promoting a user to `super_admin` (manual SQL, audited) | A/R | I | I | I | I | I | I | I | I | I | I | I | I | I | I | C | C | I | I |
+| Agent Console chat and proposals | I | I | C | C | I | I | I | C | I | I | C | C | C | C | A/R | C | C | I | C |
+| Approving an agent proposal for commit | A/R | I | I | C | I | I | I | I | I | I | I | I | I | I | C | C | I | I | I |
+| Accessibility conformance | I | I | I | I | I | I | I | I | I | C | C | R | A | I | R | I | R | I | R |
+| Privacy, retention, consent | C | I | I | C | I | C | C | I | C | I | C | I | I | R | I | C | C | A | C |
+| Test strategy and release gate | C | C | I | C | I | I | I | C | I | I | I | C | C | C | C | C | C | C | A/R |
+| Release go/no-go | A | R | I | C | I | I | I | I | I | I | I | I | C | C | I | C | I | C | C |
+| Production monitoring and incidents | I | I | I | C | I | I | I | C | C | I | I | C | I | A/R | C | C | C | C | I |
+| Claude cost and budget | A | I | I | I | I | I | I | R | I | I | I | I | I | C | C | C | I | I | I |
+| Security review and secrets | I | I | I | C | I | I | I | C | I | I | I | I | I | C | C | A/R | C | C | I |
 
 ---
 
@@ -718,6 +720,7 @@ Level 2  Domain authority decides:
    │        security, tokens, tools ...... security-expert      (veto)
    │        personal data, source terms .. privacy-compliance-spec (veto)
    │        WCAG conformance ............. accessibility-specialist (veto)
+   │        Supabase schema, RLS, auth UI  supabase-auth-engineer (security-expert reviews)
    │        scoring logic ................ candidate-job-matching-expert
    │        prompts, models, evals ....... ai-systems-engineer
    │        visual style ................. Sable;  flows/copy ... Wren
@@ -962,6 +965,7 @@ Hard failures (automatic suspension regardless of score):
 - W3C WCAG 2.2.
 - GitHub fine-grained personal access tokens and REST API docs.
 - Netlify Functions, Blobs and environment variable docs.
+- Supabase Auth, MFA, API keys and row level security docs (read 2026-11-25), https://supabase.com/docs/guides/auth; decision in [ADR 0006](adr/0006-supabase-auth.md).
 
 ---
 
@@ -969,15 +973,15 @@ Hard failures (automatic suspension regardless of score):
 
 | Element | Location | Count |
 |---|---|---|
-| Subagents | `.claude/agents/*.md` | 17 (14 required + accessibility, privacy, AI systems) |
-| Shared skills | `.claude/skills/<name>/SKILL.md` | 54 (all 39 named by the project lead + 15 supporting) |
-| Per-agent knowledge | `knowledge/<agent>/docs`, `knowledge/<agent>/examples` | 17 folders, 35 runnable examples, all passing |
-| Binding decisions | `docs/adr/0001–0005` | 5 |
+| Subagents | `.claude/agents/*.md` | 18 (14 required + accessibility, privacy, AI systems, Supabase auth) |
+| Shared skills | `.claude/skills/<name>/SKILL.md` | 56 (all 39 named by the project lead + 17 supporting) |
+| Per-agent knowledge | `knowledge/<agent>/docs`, `knowledge/<agent>/examples` | 18 folders; runnable examples all passing (35 before `supabase-auth-engineer`; recount after T3) |
+| Binding decisions | `docs/adr/0001–0006` | 5 accepted + 1 proposed (0006) |
 | Operating manual | `CLAUDE.md` | 1 |
 | Validator | `scripts/validate-agents.mjs` | passes |
 
-Supporting skills added beyond the named 39 (each fills a real gap from the skills matrix): `architecture-decisions`, `system-architecture`, `background-jobs`, `incident-response`, `ai-evaluation`, `skill-taxonomy`, `match-explanations`, `fairness-in-hiring`, `usajobs-integration`, `job-posting-structured-data`, `source-terms-review`, `ux-writing`, `secrets-management`, `prompt-injection-defense`, `audit-logging`.
+Supporting skills added beyond the named 39 (each fills a real gap from the skills matrix): `architecture-decisions`, `system-architecture`, `background-jobs`, `incident-response`, `ai-evaluation`, `skill-taxonomy`, `match-explanations`, `fairness-in-hiring`, `usajobs-integration`, `job-posting-structured-data`, `source-terms-review`, `ux-writing`, `secrets-management`, `prompt-injection-defense`, `audit-logging`, `supabase-auth`, `supabase-row-level-security` (last two added 2026-11-25 with ADR 0006).
 
 Name changes from v1.0 of this roster: `agent-builder` → `meta-agent`; `finance-market-specialist` → `finance-job-market-specialist`; `matching-scoring-expert` → `candidate-job-matching-expert`; `job-data-integration-engineer` → `job-data-integration-expert`; `mobile-pwa-engineer` → `mobile-pwa-expert`; `security-engineer` → `security-expert`.
 
-Delegation model: the orchestrator runs as the main thread (`claude --agent orchestrator`) and may spawn the 16 specialists listed in its `tools: Agent(...)` allowlist. Specialists have no `Agent` or `SendMessage` tool, so they cannot contact each other; every result returns to the orchestrator (ADR 0005).
+Delegation model: the orchestrator runs as the main thread (`claude --agent orchestrator`) and may spawn the 17 specialists listed in its `tools: Agent(...)` allowlist. Specialists have no `Agent` or `SendMessage` tool, so they cannot contact each other; every result returns to the orchestrator (ADR 0005).

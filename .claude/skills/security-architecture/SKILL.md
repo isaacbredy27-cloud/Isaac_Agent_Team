@@ -33,7 +33,7 @@ Browser (untrusted) → Netlify Functions (trusted, hold secrets) → Claude API
 | A04 Cryptographic Failures | HTTPS, AES-256-GCM for profiles, Blobs encryption at rest |
 | A05 Injection | Zod validation, no HTML from mammoth, LLM injection controls |
 | A06 Insecure Design | human approval, code-decides scoring, ADRs |
-| A07 Authentication Failures | OIDC + MFA admins, step-up |
+| A07 Authentication Failures | Supabase Auth, per-request getClaims + profiles role (RLS), MFA (aal2) for super_admin, TOTP step-up |
 | A08 Integrity Failures | base-SHA check, force:false, signed releases optional |
 | A09 Logging & Alerting Failures | audit log in Blobs (1 yr), alerts |
 | A10 Exceptional Conditions | refusal/max_tokens handling, safe error messages |

@@ -8,6 +8,7 @@ const PATTERNS = [
   ["github-classic-pat", /gh[pousr]_[A-Za-z0-9]{30,}/],
   ["private-key", /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
   ["netlify-build-hook", /api\.netlify\.com\/build_hooks\/[a-f0-9]{24}/],
+  ["supabase-secret-key", /sb_secret_[A-Za-z0-9_-]{8,}/],
 ];
 export const scan = (text) => PATTERNS.filter(([, re]) => re.test(text)).map(([id]) => id);
 
@@ -16,4 +17,6 @@ assert.deepEqual(scan("headers: { 'x-api-key': 'sk-ant-api03-AbCdEf123456' }"), 
 assert.deepEqual(scan("token=github_pat_11ABCDEFG0123456789_abcdefghijklmnop"), ["github-fine-grained-pat"]);
 assert.deepEqual(scan("-----BEGIN RSA PRIVATE KEY-----\nMII…"), ["private-key"]);
 assert.deepEqual(scan("https://api.netlify.com/build_hooks/5f8d0c1e2a3b4c5d6e7f8a9b"), ["netlify-build-hook"]);
-console.log("OK: scanner flags Anthropic keys, GitHub PATs, private keys and build hooks; ignores clean code");
+assert.deepEqual(scan("SUPABASE_KEY=sb_secret_FAKEfake1234567890"), ["supabase-secret-key"]);
+assert.deepEqual(scan("SUPABASE_PUBLISHABLE_KEY=sb_publishable_FAKEfake1234567890"), []);
+console.log("OK: scanner flags Anthropic keys, GitHub PATs, private keys, build hooks and Supabase secret keys; ignores clean code and publishable keys");

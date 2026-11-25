@@ -1,6 +1,6 @@
 # Plan: Supabase Auth, profiles and the super_admin role
 
-Owner: `orchestrator` (Morgan). Created 2026-11-25. Status: **Planned — not started.**
+Owner: `orchestrator` (Morgan). Created 2026-11-25. Status: **Docs, agent, skills and knowledge done (2026-11-25). ADR 0006 awaits the project lead. App not built.**
 
 ## Goal
 
