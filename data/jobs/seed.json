@@ -1,0 +1,623 @@
+[
+  {
+    "id": "seed-001",
+    "title": "Staff Accountant",
+    "company": "Example Capital Partners",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-25T17:00:00.000Z",
+    "url": "https://example.com/jobs/seed-001",
+    "source": "seed",
+    "description": "Example Capital Partners is a fictional employer used for demo data. Post journal entries, reconcile bank and subledger accounts, and support the monthly close. Requirements: 1+ years of related experience; GAAP, Account Reconciliation, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Orlando, FL.",
+    "skills": [
+      "GAAP",
+      "Account Reconciliation",
+      "Excel",
+      "Month-End Close"
+    ]
+  },
+  {
+    "id": "seed-002",
+    "title": "Senior Accountant",
+    "company": "Sunshine Example Bank",
+    "location": "Lake Mary, FL",
+    "remote": false,
+    "postedAt": "2026-11-25T02:36:00.000Z",
+    "url": "https://example.com/jobs/seed-002",
+    "source": "seed",
+    "description": "Sunshine Example Bank is a fictional employer used for demo data. Own the close for two entities, prepare flux analysis and support audit requests. Requirements: 4+ years of related experience; GAAP, Month-End Close, Account Reconciliation experience required. Bachelor's degree in accounting or finance preferred. Location: Lake Mary, FL.",
+    "skills": [
+      "GAAP",
+      "Month-End Close",
+      "Account Reconciliation",
+      "CPA",
+      "NetSuite"
+    ]
+  },
+  {
+    "id": "seed-003",
+    "title": "Financial Analyst",
+    "company": "Citrus Example Financial",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-24T12:12:00.000Z",
+    "url": "https://example.com/jobs/seed-003",
+    "source": "seed",
+    "description": "Citrus Example Financial is a fictional employer used for demo data. Build forecasts and monthly variance reports for operating leaders. Requirements: 2+ years of related experience; Financial Modeling, Excel, Variance Analysis experience required. Bachelor's degree in accounting or finance preferred. Location: Orlando, FL.",
+    "skills": [
+      "Financial Modeling",
+      "Excel",
+      "Variance Analysis",
+      "FP&A"
+    ]
+  },
+  {
+    "id": "seed-004",
+    "title": "Senior Financial Analyst, FP&A",
+    "company": "Lakeside Example Advisors",
+    "location": "Maitland, FL",
+    "remote": false,
+    "postedAt": "2026-11-23T21:48:00.000Z",
+    "url": "https://example.com/jobs/seed-004",
+    "source": "seed",
+    "description": "Lakeside Example Advisors is a fictional employer used for demo data. Lead the annual budget cycle and rolling forecast for a regional business unit. Requirements: 5+ years of related experience; FP&A, Financial Modeling, Budgeting experience required. Bachelor's degree in accounting or finance preferred. Location: Maitland, FL.",
+    "skills": [
+      "FP&A",
+      "Financial Modeling",
+      "Budgeting",
+      "Forecasting",
+      "Power BI"
+    ]
+  },
+  {
+    "id": "seed-005",
+    "title": "Accounts Payable Specialist",
+    "company": "Demo Orlando Insurance Group",
+    "location": "Winter Park, FL",
+    "remote": false,
+    "postedAt": "2026-11-23T09:48:00.000Z",
+    "url": "https://example.com/jobs/seed-005",
+    "source": "seed",
+    "description": "Demo Orlando Insurance Group is a fictional employer used for demo data. Process vendor invoices, resolve discrepancies and run weekly payment batches. Requirements: 1+ years of related experience; Accounts Payable, Invoice Processing, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Winter Park, FL.",
+    "skills": [
+      "Accounts Payable",
+      "Invoice Processing",
+      "Excel",
+      "ERP"
+    ]
+  },
+  {
+    "id": "seed-006",
+    "title": "Accounts Receivable Analyst",
+    "company": "Fictional Theme Resorts Finance",
+    "location": "Kissimmee, FL",
+    "remote": false,
+    "postedAt": "2026-11-22T19:24:00.000Z",
+    "url": "https://example.com/jobs/seed-006",
+    "source": "seed",
+    "description": "Fictional Theme Resorts Finance is a fictional employer used for demo data. Apply cash, manage collections and report aging to the controller. Requirements: 2+ years of related experience; Accounts Receivable, Collections, Cash Application experience required. Bachelor's degree in accounting or finance preferred. Location: Kissimmee, FL.",
+    "skills": [
+      "Accounts Receivable",
+      "Collections",
+      "Cash Application",
+      "Excel"
+    ]
+  },
+  {
+    "id": "seed-007",
+    "title": "Payroll Accountant",
+    "company": "Sample Mutual Credit Union",
+    "location": "Sanford, FL",
+    "remote": false,
+    "postedAt": "2026-11-22T05:00:00.000Z",
+    "url": "https://example.com/jobs/seed-007",
+    "source": "seed",
+    "description": "Sample Mutual Credit Union is a fictional employer used for demo data. Reconcile payroll liabilities and prepare payroll journal entries. Requirements: 3+ years of related experience; Payroll, GAAP, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Sanford, FL.",
+    "skills": [
+      "Payroll",
+      "GAAP",
+      "Excel",
+      "Account Reconciliation"
+    ]
+  },
+  {
+    "id": "seed-008",
+    "title": "Assistant Controller",
+    "company": "Placeholder Title & Escrow",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-21T14:36:00.000Z",
+    "url": "https://example.com/jobs/seed-008",
+    "source": "seed",
+    "description": "Placeholder Title & Escrow is a fictional employer used for demo data. Oversee the accounting team, financial statements and audit coordination. Requirements: 8+ years of related experience; GAAP, Month-End Close, Internal Controls experience required. Bachelor's degree in accounting or finance preferred. Location: Orlando, FL.",
+    "skills": [
+      "GAAP",
+      "Month-End Close",
+      "Internal Controls",
+      "CPA",
+      "Team Leadership"
+    ]
+  },
+  {
+    "id": "seed-009",
+    "title": "Controller",
+    "company": "Example Healthcare Systems",
+    "location": "Maitland, FL",
+    "remote": false,
+    "postedAt": "2026-11-21T00:12:00.000Z",
+    "url": "https://example.com/jobs/seed-009",
+    "source": "seed",
+    "description": "Example Healthcare Systems is a fictional employer used for demo data. Lead accounting, treasury support and reporting for a mid-size company. Requirements: 10+ years of related experience; GAAP, SEC Reporting, Internal Controls experience required. Bachelor's degree in accounting or finance preferred. Location: Maitland, FL.",
+    "skills": [
+      "GAAP",
+      "SEC Reporting",
+      "Internal Controls",
+      "CPA",
+      "Budgeting"
+    ]
+  },
+  {
+    "id": "seed-010",
+    "title": "Internal Auditor",
+    "company": "Mockingbird Wealth Management",
+    "location": "Lake Mary, FL",
+    "remote": false,
+    "postedAt": "2026-11-20T09:48:00.000Z",
+    "url": "https://example.com/jobs/seed-010",
+    "source": "seed",
+    "description": "Mockingbird Wealth Management is a fictional employer used for demo data. Plan and run risk-based audits and report findings to the audit committee. Requirements: 3+ years of related experience; Internal Audit, SOX, Risk Assessment experience required. Bachelor's degree in accounting or finance preferred. Location: Lake Mary, FL.",
+    "skills": [
+      "Internal Audit",
+      "SOX",
+      "Risk Assessment",
+      "CIA",
+      "Excel"
+    ]
+  },
+  {
+    "id": "seed-011",
+    "title": "Tax Accountant",
+    "company": "Acme Example Logistics",
+    "location": "Winter Park, FL",
+    "remote": false,
+    "postedAt": "2026-11-19T21:48:00.000Z",
+    "url": "https://example.com/jobs/seed-011",
+    "source": "seed",
+    "description": "Acme Example Logistics is a fictional employer used for demo data. Prepare federal and state returns and quarterly estimates. Requirements: 3+ years of related experience; Tax Preparation, CPA, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Winter Park, FL.",
+    "skills": [
+      "Tax Preparation",
+      "CPA",
+      "Excel",
+      "GAAP"
+    ]
+  },
+  {
+    "id": "seed-012",
+    "title": "Senior Tax Analyst",
+    "company": "Test Harbor Properties",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-19T07:24:00.000Z",
+    "url": "https://example.com/jobs/seed-012",
+    "source": "seed",
+    "description": "Test Harbor Properties is a fictional employer used for demo data. Prepare the income tax provision and support audits. Requirements: 5+ years of related experience; Tax Provision, ASC 740, CPA experience required. Bachelor's degree in accounting or finance preferred. Location: Orlando, FL.",
+    "skills": [
+      "Tax Provision",
+      "ASC 740",
+      "CPA",
+      "Excel"
+    ]
+  },
+  {
+    "id": "seed-013",
+    "title": "Credit Analyst",
+    "company": "Example Capital Partners",
+    "location": "Celebration, FL",
+    "remote": false,
+    "postedAt": "2026-11-18T17:00:00.000Z",
+    "url": "https://example.com/jobs/seed-013",
+    "source": "seed",
+    "description": "Example Capital Partners is a fictional employer used for demo data. Analyze borrower financials and write credit memos for commercial loans. Requirements: 3+ years of related experience; Credit Analysis, Financial Statement Analysis, Underwriting experience required. Bachelor's degree in accounting or finance preferred. Location: Celebration, FL.",
+    "skills": [
+      "Credit Analysis",
+      "Financial Statement Analysis",
+      "Underwriting",
+      "Excel"
+    ]
+  },
+  {
+    "id": "seed-014",
+    "title": "Commercial Loan Underwriter",
+    "company": "Sunshine Example Bank",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-18T02:36:00.000Z",
+    "url": "https://example.com/jobs/seed-014",
+    "source": "seed",
+    "description": "Sunshine Example Bank is a fictional employer used for demo data. Underwrite commercial real estate and C&I loan requests. Requirements: 5+ years of related experience; Underwriting, Credit Analysis, Risk Management experience required. Bachelor's degree in accounting or finance preferred. Location: Orlando, FL.",
+    "skills": [
+      "Underwriting",
+      "Credit Analysis",
+      "Risk Management",
+      "Excel"
+    ]
+  },
+  {
+    "id": "seed-015",
+    "title": "Mortgage Loan Processor",
+    "company": "Citrus Example Financial",
+    "location": "Sanford, FL",
+    "remote": false,
+    "postedAt": "2026-11-17T12:12:00.000Z",
+    "url": "https://example.com/jobs/seed-015",
+    "source": "seed",
+    "description": "Citrus Example Financial is a fictional employer used for demo data. Prepare loan files, order verifications and meet closing deadlines. Requirements: 2+ years of related experience; Mortgage Processing, Underwriting, Compliance experience required. Bachelor's degree in accounting or finance preferred. Location: Sanford, FL.",
+    "skills": [
+      "Mortgage Processing",
+      "Underwriting",
+      "Compliance",
+      "Excel"
+    ]
+  },
+  {
+    "id": "seed-016",
+    "title": "Treasury Analyst",
+    "company": "Lakeside Example Advisors",
+    "location": "Maitland, FL",
+    "remote": false,
+    "postedAt": "2026-11-16T21:48:00.000Z",
+    "url": "https://example.com/jobs/seed-016",
+    "source": "seed",
+    "description": "Lakeside Example Advisors is a fictional employer used for demo data. Manage daily cash positioning and forecast liquidity. Requirements: 3+ years of related experience; Treasury, Cash Forecasting, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Maitland, FL.",
+    "skills": [
+      "Treasury",
+      "Cash Forecasting",
+      "Excel",
+      "Bank Relations"
+    ]
+  },
+  {
+    "id": "seed-017",
+    "title": "Revenue Accountant",
+    "company": "Demo Orlando Insurance Group",
+    "location": "Lake Mary, FL",
+    "remote": false,
+    "postedAt": "2026-11-16T09:48:00.000Z",
+    "url": "https://example.com/jobs/seed-017",
+    "source": "seed",
+    "description": "Demo Orlando Insurance Group is a fictional employer used for demo data. Apply revenue recognition to contracts and reconcile deferred revenue. Requirements: 3+ years of related experience; Revenue Recognition, ASC 606, GAAP experience required. Bachelor's degree in accounting or finance preferred. Location: Lake Mary, FL.",
+    "skills": [
+      "Revenue Recognition",
+      "ASC 606",
+      "GAAP",
+      "Excel"
+    ]
+  },
+  {
+    "id": "seed-018",
+    "title": "Cost Accountant",
+    "company": "Fictional Theme Resorts Finance",
+    "location": "Kissimmee, FL",
+    "remote": false,
+    "postedAt": "2026-11-15T19:24:00.000Z",
+    "url": "https://example.com/jobs/seed-018",
+    "source": "seed",
+    "description": "Fictional Theme Resorts Finance is a fictional employer used for demo data. Maintain standard costs and analyze manufacturing variances. Requirements: 3+ years of related experience; Cost Accounting, Inventory, Variance Analysis experience required. Bachelor's degree in accounting or finance preferred. Location: Kissimmee, FL.",
+    "skills": [
+      "Cost Accounting",
+      "Inventory",
+      "Variance Analysis",
+      "Excel"
+    ]
+  },
+  {
+    "id": "seed-019",
+    "title": "Financial Reporting Manager",
+    "company": "Sample Mutual Credit Union",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-15T05:00:00.000Z",
+    "url": "https://example.com/jobs/seed-019",
+    "source": "seed",
+    "description": "Sample Mutual Credit Union is a fictional employer used for demo data. Prepare quarterly filings and board reporting packages. Requirements: 7+ years of related experience; SEC Reporting, GAAP, Financial Reporting experience required. Bachelor's degree in accounting or finance preferred. Location: Orlando, FL.",
+    "skills": [
+      "SEC Reporting",
+      "GAAP",
+      "Financial Reporting",
+      "CPA",
+      "XBRL"
+    ]
+  },
+  {
+    "id": "seed-020",
+    "title": "Accounting Manager",
+    "company": "Placeholder Title & Escrow",
+    "location": "Winter Park, FL",
+    "remote": false,
+    "postedAt": "2026-11-14T14:36:00.000Z",
+    "url": "https://example.com/jobs/seed-020",
+    "source": "seed",
+    "description": "Placeholder Title & Escrow is a fictional employer used for demo data. Manage the close calendar and a team of four accountants. Requirements: 7+ years of related experience; GAAP, Month-End Close, Team Leadership experience required. Bachelor's degree in accounting or finance preferred. Location: Winter Park, FL.",
+    "skills": [
+      "GAAP",
+      "Month-End Close",
+      "Team Leadership",
+      "CPA",
+      "NetSuite"
+    ]
+  },
+  {
+    "id": "seed-021",
+    "title": "Fund Accountant",
+    "company": "Example Healthcare Systems",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-14T00:12:00.000Z",
+    "url": "https://example.com/jobs/seed-021",
+    "source": "seed",
+    "description": "Example Healthcare Systems is a fictional employer used for demo data. Prepare NAVs and capital account statements for private funds. Requirements: 2+ years of related experience; Fund Accounting, GAAP, NAV Calculation experience required. Bachelor's degree in accounting or finance preferred. Location: Orlando, FL.",
+    "skills": [
+      "Fund Accounting",
+      "GAAP",
+      "NAV Calculation",
+      "Excel"
+    ]
+  },
+  {
+    "id": "seed-022",
+    "title": "Wealth Management Operations Analyst",
+    "company": "Mockingbird Wealth Management",
+    "location": "Maitland, FL",
+    "remote": false,
+    "postedAt": "2026-11-13T09:48:00.000Z",
+    "url": "https://example.com/jobs/seed-022",
+    "source": "seed",
+    "description": "Mockingbird Wealth Management is a fictional employer used for demo data. Support advisors with account opening, transfers and reconciliations. Requirements: 2+ years of related experience; Wealth Management, Reconciliation, Compliance experience required. Bachelor's degree in accounting or finance preferred. Location: Maitland, FL.",
+    "skills": [
+      "Wealth Management",
+      "Reconciliation",
+      "Compliance",
+      "Excel"
+    ]
+  },
+  {
+    "id": "seed-023",
+    "title": "Investment Analyst",
+    "company": "Acme Example Logistics",
+    "location": "Winter Park, FL",
+    "remote": false,
+    "postedAt": "2026-11-12T21:48:00.000Z",
+    "url": "https://example.com/jobs/seed-023",
+    "source": "seed",
+    "description": "Acme Example Logistics is a fictional employer used for demo data. Build models and write investment memos for the portfolio committee. Requirements: 3+ years of related experience; Equity Research, Financial Modeling, Valuation experience required. Bachelor's degree in accounting or finance preferred. Location: Winter Park, FL.",
+    "skills": [
+      "Equity Research",
+      "Financial Modeling",
+      "Valuation",
+      "Excel",
+      "CFA"
+    ]
+  },
+  {
+    "id": "seed-024",
+    "title": "Financial Advisor Associate",
+    "company": "Test Harbor Properties",
+    "location": "Lake Mary, FL",
+    "remote": false,
+    "postedAt": "2026-11-12T07:24:00.000Z",
+    "url": "https://example.com/jobs/seed-024",
+    "source": "seed",
+    "description": "Test Harbor Properties is a fictional employer used for demo data. Support client reviews and prepare planning analyses. Requirements: 1+ years of related experience; Wealth Management, Client Service, Series 65 experience required. Bachelor's degree in accounting or finance preferred. Location: Lake Mary, FL.",
+    "skills": [
+      "Wealth Management",
+      "Client Service",
+      "Series 65",
+      "Financial Planning"
+    ]
+  },
+  {
+    "id": "seed-025",
+    "title": "Insurance Premium Auditor",
+    "company": "Example Capital Partners",
+    "location": "Sanford, FL",
+    "remote": false,
+    "postedAt": "2026-11-11T17:00:00.000Z",
+    "url": "https://example.com/jobs/seed-025",
+    "source": "seed",
+    "description": "Example Capital Partners is a fictional employer used for demo data. Audit policyholder records and compute premium adjustments. Requirements: 2+ years of related experience; Premium Audit, Insurance, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Sanford, FL.",
+    "skills": [
+      "Premium Audit",
+      "Insurance",
+      "Excel",
+      "Compliance"
+    ]
+  },
+  {
+    "id": "seed-026",
+    "title": "Claims Financial Analyst",
+    "company": "Sunshine Example Bank",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-11T02:36:00.000Z",
+    "url": "https://example.com/jobs/seed-026",
+    "source": "seed",
+    "description": "Sunshine Example Bank is a fictional employer used for demo data. Analyze claim payments and reserve movements. Requirements: 3+ years of related experience; Insurance, Reserving, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Orlando, FL.",
+    "skills": [
+      "Insurance",
+      "Reserving",
+      "Excel",
+      "SQL"
+    ]
+  },
+  {
+    "id": "seed-027",
+    "title": "Budget Analyst",
+    "company": "Citrus Example Financial",
+    "location": "Altamonte Springs, FL",
+    "remote": false,
+    "postedAt": "2026-11-10T12:12:00.000Z",
+    "url": "https://example.com/jobs/seed-027",
+    "source": "seed",
+    "description": "Citrus Example Financial is a fictional employer used for demo data. Prepare departmental budgets and monitor spending. Requirements: 2+ years of related experience; Budgeting, Forecasting, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Altamonte Springs, FL.",
+    "skills": [
+      "Budgeting",
+      "Forecasting",
+      "Excel",
+      "Government Accounting"
+    ]
+  },
+  {
+    "id": "seed-028",
+    "title": "Property Accountant",
+    "company": "Lakeside Example Advisors",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-09T21:48:00.000Z",
+    "url": "https://example.com/jobs/seed-028",
+    "source": "seed",
+    "description": "Lakeside Example Advisors is a fictional employer used for demo data. Close the books for a portfolio of commercial properties. Requirements: 3+ years of related experience; Real Estate Accounting, GAAP, Yardi experience required. Bachelor's degree in accounting or finance preferred. Location: Orlando, FL.",
+    "skills": [
+      "Real Estate Accounting",
+      "GAAP",
+      "Yardi",
+      "Account Reconciliation"
+    ]
+  },
+  {
+    "id": "seed-029",
+    "title": "Billing Specialist",
+    "company": "Demo Orlando Insurance Group",
+    "location": "Celebration, FL",
+    "remote": false,
+    "postedAt": "2026-11-09T09:48:00.000Z",
+    "url": "https://example.com/jobs/seed-029",
+    "source": "seed",
+    "description": "Demo Orlando Insurance Group is a fictional employer used for demo data. Issue invoices and resolve billing questions. Requirements: 1+ years of related experience; Billing, Accounts Receivable, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Celebration, FL.",
+    "skills": [
+      "Billing",
+      "Accounts Receivable",
+      "Excel",
+      "Customer Service"
+    ]
+  },
+  {
+    "id": "seed-030",
+    "title": "BSA/AML Compliance Analyst",
+    "company": "Fictional Theme Resorts Finance",
+    "location": "Kissimmee, FL",
+    "remote": false,
+    "postedAt": "2026-11-08T19:24:00.000Z",
+    "url": "https://example.com/jobs/seed-030",
+    "source": "seed",
+    "description": "Fictional Theme Resorts Finance is a fictional employer used for demo data. Review alerts, file SARs and support regulatory exams. Requirements: 3+ years of related experience; BSA/AML, KYC, Compliance experience required. Bachelor's degree in accounting or finance preferred. Location: Kissimmee, FL.",
+    "skills": [
+      "BSA/AML",
+      "KYC",
+      "Compliance",
+      "Risk Assessment"
+    ]
+  },
+  {
+    "id": "seed-031",
+    "title": "Financial Planning Manager",
+    "company": "Sample Mutual Credit Union",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-08T05:00:00.000Z",
+    "url": "https://example.com/jobs/seed-031",
+    "source": "seed",
+    "description": "Sample Mutual Credit Union is a fictional employer used for demo data. Lead planning for a hospitality business; remote candidates in Florida considered. Requirements: 6+ years of related experience; FP&A, Forecasting, Financial Modeling experience required. Bachelor's degree in accounting or finance preferred. Location: Orlando, FL.",
+    "skills": [
+      "FP&A",
+      "Forecasting",
+      "Financial Modeling",
+      "Team Leadership",
+      "SQL"
+    ]
+  },
+  {
+    "id": "seed-032",
+    "title": "Remote Staff Accountant (Florida)",
+    "company": "Placeholder Title & Escrow",
+    "location": "Remote, FL",
+    "remote": true,
+    "postedAt": "2026-11-07T14:36:00.000Z",
+    "url": "https://example.com/jobs/seed-032",
+    "source": "seed",
+    "description": "Placeholder Title & Escrow is a fictional employer used for demo data. Fully remote role for candidates living in Florida; quarterly visit to Orlando office. Requirements: 2+ years of related experience; GAAP, Account Reconciliation, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Remote, FL.",
+    "skills": [
+      "GAAP",
+      "Account Reconciliation",
+      "Excel",
+      "NetSuite"
+    ]
+  },
+  {
+    "id": "seed-033",
+    "title": "Remote Senior Financial Analyst",
+    "company": "Example Healthcare Systems",
+    "location": "Remote, FL",
+    "remote": true,
+    "postedAt": "2026-11-07T00:12:00.000Z",
+    "url": "https://example.com/jobs/seed-033",
+    "source": "seed",
+    "description": "Example Healthcare Systems is a fictional employer used for demo data. Remote within the United States; Orlando team meets monthly. Requirements: 4+ years of related experience; FP&A, Financial Modeling, Power BI experience required. Bachelor's degree in accounting or finance preferred. Location: Remote, FL.",
+    "skills": [
+      "FP&A",
+      "Financial Modeling",
+      "Power BI",
+      "SQL"
+    ]
+  },
+  {
+    "id": "seed-034",
+    "title": "Hybrid FP&A Manager",
+    "company": "Mockingbird Wealth Management",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-06T09:48:00.000Z",
+    "url": "https://example.com/jobs/seed-034",
+    "source": "seed",
+    "description": "Mockingbird Wealth Management is a fictional employer used for demo data. Hybrid, three days a week in the Orlando office. Requirements: 7+ years of related experience; FP&A, Budgeting, Forecasting experience required. Bachelor's degree in accounting or finance preferred. Hybrid work arrangement. Location: Orlando, FL.",
+    "skills": [
+      "FP&A",
+      "Budgeting",
+      "Forecasting",
+      "Team Leadership"
+    ]
+  },
+  {
+    "id": "seed-035",
+    "title": "Hybrid Senior Auditor",
+    "company": "Acme Example Logistics",
+    "location": "Orlando, FL",
+    "remote": false,
+    "postedAt": "2026-11-05T21:48:00.000Z",
+    "url": "https://example.com/jobs/seed-035",
+    "source": "seed",
+    "description": "Acme Example Logistics is a fictional employer used for demo data. Hybrid schedule; travel to Florida sites up to 20 percent. Requirements: 4+ years of related experience; Internal Audit, SOX, GAAP experience required. Bachelor's degree in accounting or finance preferred. Hybrid work arrangement. Location: Orlando, FL.",
+    "skills": [
+      "Internal Audit",
+      "SOX",
+      "GAAP",
+      "CPA"
+    ]
+  },
+  {
+    "id": "seed-036",
+    "title": "Collections Analyst",
+    "company": "Test Harbor Properties",
+    "location": "Maitland, FL",
+    "remote": false,
+    "postedAt": "2026-11-05T07:24:00.000Z",
+    "url": "https://example.com/jobs/seed-036",
+    "source": "seed",
+    "description": "Test Harbor Properties is a fictional employer used for demo data. Work past-due accounts and negotiate payment plans. Requirements: 2+ years of related experience; Collections, Accounts Receivable, Excel experience required. Bachelor's degree in accounting or finance preferred. Location: Maitland, FL.",
+    "skills": [
+      "Collections",
+      "Accounts Receivable",
+      "Excel",
+      "Customer Service"
+    ]
+  }
+]

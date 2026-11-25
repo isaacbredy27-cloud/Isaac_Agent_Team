@@ -1,0 +1,156 @@
+/* Finance Match Orlando design tokens (Sable).
+   Glass is only for the navigation layer: .glass-bar, .sheet. Never cards, lists or backgrounds.
+   Every text token is checked at 4.5:1 on its surface (see docs/design/visual/ for the table). */
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces */
+  --bg: #f2f4f7;
+  --surface: #ffffff;
+  --surface-opaque: #f2f4f7;
+  --surface-raised: #ffffff;
+  --border: #d5dae2;
+  --border-strong: #8b94a3;
+
+  /* Text */
+  --text-primary: #111418;
+  --text-secondary: #4a5260;
+  --text-on-brand: #ffffff;
+
+  /* Brand and focus */
+  --brand: #0b3d6e;
+  --brand-hover: #082f55;
+  --link: #0b5cad;
+  --focus-ring: #0a64c8;
+
+  /* Glass (regular variant) */
+  --glass-bg: rgb(255 255 255 / 0.72);
+  --glass-border: rgb(255 255 255 / 0.55);
+  --glass-shadow: 0 8px 28px rgb(15 25 40 / 0.14);
+  --glass-blur: 20px;
+  --glass-saturate: 160%;
+
+  /* Score bands: color + icon + text label, one meaning per color */
+  --band-strong-fg: #14602c;
+  --band-strong-bg: #e2f4e8;
+  --band-moderate-fg: #8a5a00;
+  --band-moderate-bg: #fff4d6;
+  --band-weak-fg: #b42318;
+  --band-weak-bg: #fde9e7;
+
+  /* Status */
+  --danger: #b42318;
+
+  /* Shape and size */
+  --radius-card: 16px;
+  --radius-control: 22px;
+  --radius-chip: 999px;
+  --radius-sheet: 28px;
+  --tap: 44px;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  /* Type (rem so browser zoom and text size scale) */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.75rem;
+  --leading: 1.45;
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur: 220ms;
+
+  /* Safe areas */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --bar-height: 56px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0d12;
+    --surface: #131820;
+    --surface-opaque: #1a1f27;
+    --surface-raised: #1a1f27;
+    --border: #2b323d;
+    --border-strong: #7d8798;
+
+    --text-primary: #f3f5f8;
+    --text-secondary: #b5bdc9;
+    --text-on-brand: #0a0d12;
+
+    --brand: #8fc2ff;
+    --brand-hover: #b3d6ff;
+    --link: #8fc2ff;
+    --focus-ring: #8fc2ff;
+
+    --glass-bg: rgb(22 26 33 / 0.72);
+    --glass-border: rgb(255 255 255 / 0.12);
+    --glass-shadow: 0 8px 28px rgb(0 0 0 / 0.5);
+
+    --band-strong-fg: #5ccf7d;
+    --band-strong-bg: #0f2a18;
+    --band-moderate-fg: #ffd27a;
+    --band-moderate-bg: #3a2c00;
+    --band-weak-fg: #ff8a80;
+    --band-weak-bg: #3d1411;
+
+    --danger: #ff8a80;
+  }
+}
+
+/* Increased contrast: stronger text, borders and band colors; glass becomes opaque in base.css */
+@media (prefers-contrast: more) {
+  :root {
+    --border: #5b6472;
+    --border-strong: #2b323d;
+    --text-secondary: #2b323d;
+    --brand: #08305a;
+    --brand-hover: #051f3b;
+    --link: #08437f;
+    --focus-ring: #003f8f;
+    --band-strong-fg: #0d4a1f;
+    --band-strong-bg: #ffffff;
+    --band-moderate-fg: #5c3b00;
+    --band-moderate-bg: #ffffff;
+    --band-weak-fg: #8f1a10;
+    --band-weak-bg: #ffffff;
+    --danger: #8f1a10;
+  }
+}
+@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+  :root {
+    --border: #9aa4b4;
+    --border-strong: #f3f5f8;
+    --text-secondary: #d8dde5;
+    --brand: #b3d6ff;
+    --brand-hover: #d6e8ff;
+    --link: #b3d6ff;
+    --focus-ring: #d6e8ff;
+    --band-strong-fg: #8ee5a8;
+    --band-strong-bg: #000000;
+    --band-moderate-fg: #ffe2a3;
+    --band-moderate-bg: #000000;
+    --band-weak-fg: #ffb3ac;
+    --band-weak-bg: #000000;
+    --danger: #ffb3ac;
+  }
+}
+
+/* Reduced motion: no transitions or automatic animation */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+  }
+}

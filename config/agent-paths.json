@@ -1,0 +1,24 @@
+{
+  "$comment": "Owner: security-expert. Global lists for Agent Console proposals (skill agent-console). Deny wins. Agent globs narrow allow further. '**/.env*' is an extra, stricter deny for nested env files.",
+  "allow": [
+    "apps/web/src/**",
+    "packages/**",
+    "data/taxonomy/**",
+    "docs/**",
+    ".claude/agents/**",
+    ".claude/skills/**",
+    "knowledge/**",
+    "tests/**"
+  ],
+  "deny": [
+    "netlify.toml",
+    "netlify/functions/**",
+    "package*.json",
+    ".github/**",
+    ".env*",
+    "**/.env*",
+    "**/*.pem",
+    "**/*.key",
+    "scripts/**"
+  ]
+}

@@ -1,0 +1,56 @@
+# No secrets here: netlify.toml env vars live in git and functions cannot read them (ADR 0001, 0003).
+# Rate limits live in each function's config.rateLimit, not here.
+[build]
+  command = "npm run build"
+  publish = "apps/web/dist"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[dev]
+  framework = "vite"
+  targetPort = 5173
+  command = "npm run dev:web"
+
+# Functions use config.path (/api/...), so no /api redirects are needed.
+# Static guide pages stay out of the SPA fallback.
+[[redirects]]
+  from = "/guide/*"
+  to = "/guide/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://*.supabase.co; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Content-Type = "application/manifest+json"

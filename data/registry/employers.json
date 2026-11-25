@@ -1,0 +1,13 @@
+{
+  "_note": "Placeholder list. Add an employer only after confirming its Greenhouse board token and recording terms status (skill: source-terms-review). Tier 1 official APIs (Greenhouse) default to allowed. Example entry shape is in _example; it is ignored by the code.",
+  "_example": {
+    "id": "example-employer",
+    "name": "Example Employer",
+    "ats": "greenhouse",
+    "boardToken": "exampletoken",
+    "tier": 1,
+    "allowed": false,
+    "termsReviewedAt": null
+  },
+  "employers": []
+}

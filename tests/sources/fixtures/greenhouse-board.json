@@ -1,0 +1,238 @@
+{
+  "_fixture": {
+    "note": "Job object shape recorded from the real figma board response (2026-11-25, see knowledge/job-data-integration-expert/examples/fixtures/greenhouse-board.json). Entries 2-4 reuse the real keys with synthetic Orlando-area values."
+  },
+  "jobs": [
+    {
+      "absolute_url": "https://boards.greenhouse.io/figma/jobs/5426468004?gh_jid=5426468004",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 4868517004,
+      "location": {
+        "name": "San Francisco, CA • New York, NY • United States"
+      },
+      "metadata": null,
+      "id": 5426468004,
+      "updated_at": "2026-10-27T13:40:12-04:00",
+      "requisition_id": "1451",
+      "title": "Account Executive, Enterprise",
+      "company_name": "Figma",
+      "first_published": "2025-01-28T18:57:29-05:00",
+      "language": "en",
+      "application_deadline": null,
+      "content": "&lt;div class=&quot;content-intro&quot;&gt;&lt;p&gt;Figma is growing our team of passionate creatives and builders on a mission to make design accessible to all. Figma’s platform helps teams bring ideas to life—whether you&#39;re brainstorming, creating a prototype, translating designs into code, or iterating with AI. From idea to product, Figma empowers teams to streamline workflows, move faster, and work together in real time from anywhere in the world. If you&#39;re excited to shape the future of design and collaboration, join us!&lt;/p&gt;&lt;/div&gt;&lt;p&gt;We are looking for an Enterprise Account Executive who will play a critical role driving sales and maximizing revenue with our Enterprise customers. You will be responsible for targeting, building and nurturing positive relationships with key executive level decision-makers, understanding complex business needs, and delivering innovative solutions across our product suite. This is an opportunity to accelerate your career, learn from leading sellers in the industry and build an incredible network of cross functional partners at Figma.&lt;/p&gt;\n&lt;p&gt;This is a full time role that can be held from one of our US hubs or remotely in the United States.&lt;/p&gt;\n&lt;h4&gt;&lt;strong&gt;What you&#39;ll do at Figma:&lt;/strong&gt;&lt;/h4&gt;\n&lt;ul&gt;\n&lt;li&gt;Create and manage a pipeline of Enterprise accounts to consistently meet or exceed quarterly and annual sales targets&lt;/li&gt;\n&lt;li&gt;Apply effective discov…[truncated for fixture]",
+      "departments": [
+        {
+          "id": 4016255004,
+          "name": "Sales",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "offices": [
+        {
+          "id": 4031430004,
+          "name": "Canada",
+          "location": null,
+          "child_ids": [
+            4031432004,
+            4031431004
+          ],
+          "parent_id": 4033142004
+        },
+        {
+          "id": 4024285004,
+          "name": "US",
+          "location": null,
+          "child_ids": [],
+          "parent_id": 4033142004
+        }
+      ],
+      "ai_disclaimer": null,
+      "include_ai_disclaimer": null,
+      "ai_opt_out_request_url": "http://app4.greenhouse.io/ai_opt_out_request/job_post/5426468004/ai_opt_out"
+    },
+    {
+      "absolute_url": "https://boards.greenhouse.io/exampleco/jobs/900001",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 4868517004,
+      "location": {
+        "name": "Orlando, FL • Remote, US"
+      },
+      "metadata": null,
+      "id": 900001,
+      "updated_at": "2026-10-27T13:40:12-04:00",
+      "requisition_id": "F-100",
+      "title": "Senior Financial Analyst",
+      "company_name": "Example Board Co",
+      "first_published": "2026-11-20T09:00:00-05:00",
+      "language": "en",
+      "application_deadline": null,
+      "content": "&lt;p&gt;Build forecasts in Excel. Requires GAAP and FP&amp;A experience.&lt;/p&gt;",
+      "departments": [
+        {
+          "id": 4016255004,
+          "name": "Sales",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "offices": [
+        {
+          "id": 4031430004,
+          "name": "Canada",
+          "location": null,
+          "child_ids": [
+            4031432004,
+            4031431004
+          ],
+          "parent_id": 4033142004
+        },
+        {
+          "id": 4024285004,
+          "name": "US",
+          "location": null,
+          "child_ids": [],
+          "parent_id": 4033142004
+        }
+      ],
+      "ai_disclaimer": null,
+      "include_ai_disclaimer": null,
+      "ai_opt_out_request_url": "http://app4.greenhouse.io/ai_opt_out_request/job_post/5426468004/ai_opt_out"
+    },
+    {
+      "absolute_url": "https://boards.greenhouse.io/exampleco/jobs/900002",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 4868517004,
+      "location": {
+        "name": "Chicago, IL"
+      },
+      "metadata": null,
+      "id": 900002,
+      "updated_at": "2026-10-27T13:40:12-04:00",
+      "requisition_id": "F-101",
+      "title": "Staff Accountant",
+      "company_name": "Example Board Co",
+      "first_published": "2026-11-19T09:00:00-05:00",
+      "language": "en",
+      "application_deadline": null,
+      "content": "&lt;p&gt;Close the books.&lt;/p&gt;",
+      "departments": [
+        {
+          "id": 4016255004,
+          "name": "Sales",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "offices": [
+        {
+          "id": 4031430004,
+          "name": "Canada",
+          "location": null,
+          "child_ids": [
+            4031432004,
+            4031431004
+          ],
+          "parent_id": 4033142004
+        },
+        {
+          "id": 4024285004,
+          "name": "US",
+          "location": null,
+          "child_ids": [],
+          "parent_id": 4033142004
+        }
+      ],
+      "ai_disclaimer": null,
+      "include_ai_disclaimer": null,
+      "ai_opt_out_request_url": "http://app4.greenhouse.io/ai_opt_out_request/job_post/5426468004/ai_opt_out"
+    },
+    {
+      "absolute_url": "https://boards.greenhouse.io/exampleco/jobs/900003",
+      "data_compliance": [
+        {
+          "type": "gdpr",
+          "requires_consent": false,
+          "requires_processing_consent": false,
+          "requires_retention_consent": false,
+          "retention_period": null,
+          "demographic_data_consent_applies": false
+        }
+      ],
+      "internal_job_id": 4868517004,
+      "location": {
+        "name": "Orlando, FL"
+      },
+      "metadata": null,
+      "id": 900003,
+      "updated_at": "2026-10-27T13:40:12-04:00",
+      "requisition_id": "F-102",
+      "title": "Software Engineer",
+      "company_name": "Example Board Co",
+      "first_published": "2026-11-18T09:00:00-05:00",
+      "language": "en",
+      "application_deadline": null,
+      "content": "&lt;p&gt;Write code.&lt;/p&gt;",
+      "departments": [
+        {
+          "id": 4016255004,
+          "name": "Sales",
+          "child_ids": [],
+          "parent_id": null
+        }
+      ],
+      "offices": [
+        {
+          "id": 4031430004,
+          "name": "Canada",
+          "location": null,
+          "child_ids": [
+            4031432004,
+            4031431004
+          ],
+          "parent_id": 4033142004
+        },
+        {
+          "id": 4024285004,
+          "name": "US",
+          "location": null,
+          "child_ids": [],
+          "parent_id": 4033142004
+        }
+      ],
+      "ai_disclaimer": null,
+      "include_ai_disclaimer": null,
+      "ai_opt_out_request_url": "http://app4.greenhouse.io/ai_opt_out_request/job_post/5426468004/ai_opt_out"
+    }
+  ],
+  "meta": {
+    "total": 4
+  }
+}
