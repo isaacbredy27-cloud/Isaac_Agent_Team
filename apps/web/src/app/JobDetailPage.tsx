@@ -32,10 +32,18 @@ export function JobDetailPage() {
           {job.company} · {job.location}
           {job.remote ? ` · ${copy.jobs.remote}` : ""}
         </p>
-        <a className="button button--primary" href={job.url} target="_blank" rel="noreferrer noopener">
-          {copy.detail.apply}
-        </a>
-        <p className="text-sm text-secondary">{copy.detail.applyHint}</p>
+        {job.source === "seed" ? (
+          <p className="text-sm text-secondary">
+            This is a sample job for demonstration. It has no real posting to apply to.
+          </p>
+        ) : (
+          <>
+            <a className="button button--primary" href={job.url} target="_blank" rel="noreferrer noopener">
+              {copy.detail.apply}
+            </a>
+            <p className="text-sm text-secondary">{copy.detail.applyHint}</p>
+          </>
+        )}
       </div>
       {m ? (
         <>
