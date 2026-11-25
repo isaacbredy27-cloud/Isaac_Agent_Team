@@ -47,7 +47,7 @@ The Console context denies `netlify/functions/**`, `netlify.toml`, `package*.jso
 
 ### 1.3 Models
 
-- Default model for every agent: `claude-opus-5-5` (frontmatter alias `opus` in Claude Code; the Console manifest resolves the alias to the full ID).
+- Each agent's model is chosen by job difficulty and cost of mistakes: see `docs/agent-brains.md` (opus for the orchestrator, architect, security expert and agent-console engineer; sonnet for the rest).
 - Effort is set per task, not per agent. Routine work runs at `low` or `medium`. Architecture, security review and scoring changes run at `high`.
 - Moving an agent to a cheaper model is the human lead's decision. It requires a passing eval run (section 13) first.
 
@@ -807,7 +807,7 @@ skills:
 
 - Every roster agent exists; name equals file name and follows section 11.
 - Frontmatter uses only Claude Code fields (unknown fields are ignored silently by Claude Code, so they are rejected here).
-- `model: opus`; only the orchestrator has `Agent`; nobody has `SendMessage`; no `memory`.
+- `model` is opus, sonnet or haiku (docs/agent-brains.md); a `## Persona` section exists; only the orchestrator has `Agent`; nobody has `SendMessage`; no `memory`.
 - Every preloaded skill exists, is named in the body, and `architecture-decisions` is always preloaded.
 - Required body sections present; Before-you-answer points at `knowledge/<name>/`.
 - Console profile has all required keys; `responsibilities` globs never overlap another agent's.
@@ -845,7 +845,7 @@ Claude Code reads only its own frontmatter fields and **ignores unknown fields s
 | `name` | yes | kebab-case; equals file name |
 | `description` | yes | when to delegate; ≤ 300 chars |
 | `tools` | yes | least privilege; `Agent(...)` only for the orchestrator |
-| `model` | yes | `opus` (resolves to the current Opus, `claude-opus-5-5`); changes need the project lead |
+| `model` | yes | `opus`, `sonnet` or `haiku` per docs/agent-brains.md; changes need the project lead |
 | `skills` | yes | preloaded skills; always includes `architecture-decisions` |
 | `color` | yes | display colour by group |
 

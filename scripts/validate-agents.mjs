@@ -82,7 +82,8 @@ for (const f of agentFiles) {
   if (!desc) err(`agent ${name}: missing description`);
   if (desc.length > 300) err(`agent ${name}: description ${desc.length} chars > 300`);
   for (const k of [...fm.matchAll(/^([A-Za-z_]+):/gm)].map((m) => m[1])) if (!KNOWN_AGENT_FIELDS.has(k)) err(`agent ${name}: unknown frontmatter field "${k}" (Claude Code ignores it)`);
-  if (field(fm, "model") !== "opus") err(`agent ${name}: model must be opus (project default; changes need the lead)`);
+  if (!["opus", "sonnet", "haiku"].includes(field(fm, "model"))) err(`agent ${name}: model must be opus, sonnet or haiku (see docs/agent-brains.md)`);
+  if (!/^## Persona\n/m.test(text)) err(`agent ${name}: missing "## Persona" section`);
   if (name !== "orchestrator" && /\bAgent\b/.test(tools)) err(`agent ${name}: only the orchestrator may have the Agent tool`);
   if (/\bSendMessage\b/.test(tools)) err(`agent ${name}: specialists must not message each other`);
   if (/^memory:/m.test(fm)) err(`agent ${name}: memory auto-grants write tools; not allowed`);

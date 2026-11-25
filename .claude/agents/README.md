@@ -41,7 +41,7 @@ The validator (`scripts/validate-agents.mjs`) rejects any overlap between these 
 
 ## File structure (each agent)
 
-Frontmatter (Claude Code fields only): `name`, `description`, `tools`, `model: opus`, `color`, `skills`. Body sections: Before you answer · Mission · When to invoke · You own · You must not · How you work · Success criteria · Collaboration · Skills · Console profile (a `yaml console-profile` block read by the Agent Console manifest: display name, persona, personality, group, responsibilities, escalation, version, status, human owner).
+Frontmatter (Claude Code fields only): `name`, `description`, `tools`, `model` (opus, sonnet or haiku — see `docs/agent-brains.md`), `color`, `skills`. Body sections: Persona (first name and personality) · Before you answer · Mission · When to invoke · You own · You must not · How you work · Success criteria · Collaboration · Skills · Console profile (a `yaml console-profile` block read by the Agent Console manifest: display name, persona, personality, group, responsibilities, escalation, version, status, human owner).
 
 Why the console metadata lives in the body: Claude Code ignores unknown frontmatter fields silently, so app-only metadata stays out of the frontmatter.
 
