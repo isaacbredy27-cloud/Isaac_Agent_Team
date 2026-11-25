@@ -1,6 +1,6 @@
 # Expert Roster — Finance Match Orlando Agent Team
 
-Version 1.1 · 2026-11-25 · Status: **implemented** — 17 agents in `.claude/agents/`, 54 skills in `.claude/skills/`, knowledge in `knowledge/` (see §14)
+Version 1.2 · 2026-11-25 · Status: **implemented** — 18 agents in `.claude/agents/`, 56 skills in `.claude/skills/`, knowledge in `knowledge/` (see §14). v1.2 adds `supabase-auth-engineer` and the `user` / `super_admin` roles ([ADR 0006](adr/0006-supabase-auth.md), proposed).
 
 This is the organizational blueprint for the expert agents that design, build, test, deploy and operate Finance Match Orlando. They also run its Agent Console. It builds on the research in this folder. Start with [README.md](README.md) if you have not read it.
 

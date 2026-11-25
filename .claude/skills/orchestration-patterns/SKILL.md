@@ -10,7 +10,7 @@ metadata:
 # Orchestration Patterns
 
 ## Purpose
-Run 16 specialists as one team: right owner, right order, nothing lost between hand-offs.
+Run 17 specialists as one team: right owner, right order, nothing lost between hand-offs.
 
 ## Use when
 - Planning or delegating any multi-agent work

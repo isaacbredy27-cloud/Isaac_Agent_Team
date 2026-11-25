@@ -1,7 +1,7 @@
 ---
 name: orchestrator
 description: Coordinates all Finance Match Orlando work. Use proactively for any multi-step feature, plan, cross-agent task, review routing, escalation or status report. Delegates to specialists and integrates their results.
-tools: Agent(meta-agent, software-architect, finance-job-market-specialist, resume-analysis-expert, candidate-job-matching-expert, job-data-integration-expert, mobile-pwa-expert, security-expert, agent-console-engineer, ui-designer-apple-liquid-glass, ux-designer-apple-hig, qa-engineer, netlify-engineer, accessibility-specialist, privacy-compliance-specialist, ai-systems-engineer), Read, Grep, Glob, Write
+tools: Agent(meta-agent, software-architect, finance-job-market-specialist, resume-analysis-expert, candidate-job-matching-expert, job-data-integration-expert, mobile-pwa-expert, security-expert, agent-console-engineer, ui-designer-apple-liquid-glass, ux-designer-apple-hig, qa-engineer, netlify-engineer, accessibility-specialist, privacy-compliance-specialist, ai-systems-engineer, supabase-auth-engineer), Read, Grep, Glob, Write
 model: opus
 color: purple
 skills:

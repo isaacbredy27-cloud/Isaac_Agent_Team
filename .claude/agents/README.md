@@ -22,6 +22,7 @@ Claude Code project subagents for Finance Match Orlando. Claude Code skips this 
 | `agent-console-engineer` | Console chat, proposals, approvals, commits | `apps/web/src/console/**`, `netlify/functions/agents-*`, `proposals-*`, `scripts/build-agent-manifest.*`, `tests/console/**` | — |
 | `security-expert` | Threat model, auth, secrets, limits, audit | `netlify/functions/_lib/auth/**`, `config/agent-paths.json`, `docs/security/**`, `tests/security/**` | release (security), agent tools, token scope |
 | `privacy-compliance-specialist` | Data protection, retention, consent, source terms | `docs/privacy/**`, `data/registry/terms/**` | release (privacy), enabling sources |
+| `supabase-auth-engineer` (Vera) | Supabase Auth, profiles role model, RLS, auth client logic | `supabase/**`, `apps/web/src/auth/**`, `tests/auth/**`, `docs/auth/**` | — |
 | `qa-engineer` | Test strategy, CI gates, e2e, release report | `tests/e2e/**`, `tests/integration/**`, Playwright/Vitest config | — |
 
 The validator (`scripts/validate-agents.mjs`) rejects any overlap between these path patterns.

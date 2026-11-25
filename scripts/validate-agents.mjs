@@ -9,12 +9,12 @@ const AGENTS_DIR = join(ROOT, ".claude/agents");
 const SKILLS_DIR = join(ROOT, ".claude/skills");
 const KNOWLEDGE_DIR = join(ROOT, "knowledge");
 
-// Roster (docs/expert-roster.md §2) — 14 required + 3 approved additions.
+// Roster (docs/expert-roster.md §2) — 14 required + 4 approved additions.
 const ROSTER = [
   "orchestrator", "meta-agent", "software-architect", "finance-job-market-specialist", "resume-analysis-expert",
   "candidate-job-matching-expert", "job-data-integration-expert", "mobile-pwa-expert", "security-expert",
   "agent-console-engineer", "ui-designer-apple-liquid-glass", "ux-designer-apple-hig", "qa-engineer", "netlify-engineer",
-  "accessibility-specialist", "privacy-compliance-specialist", "ai-systems-engineer",
+  "accessibility-specialist", "privacy-compliance-specialist", "ai-systems-engineer", "supabase-auth-engineer",
 ];
 // Skills the project lead required by name (2026-11-25 request) — all must exist.
 const REQUIRED_SKILLS = [

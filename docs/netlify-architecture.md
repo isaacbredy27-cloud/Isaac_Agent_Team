@@ -1,6 +1,6 @@
 # Netlify Architecture
 
-Research date: 2026-11-24. Updated 2026-11-25: runs on the **Netlify Free plan** ([ADR 0003](adr/0003-netlify-free-plan.md)) — 300 credits/month, and going over pauses every project on the account; code-based rate limits are available; env-var scopes, basic-auth headers and long log retention are not. Owner: `netlify-engineer`. Goal: a secure, low-cost architecture with a static frontend and Netlify Functions.
+Research date: 2026-11-24. Updated 2026-11-25: runs on the **Netlify Free plan** ([ADR 0003](adr/0003-netlify-free-plan.md)) — 300 credits/month, and going over pauses every project on the account; code-based rate limits are available; env-var scopes, basic-auth headers and long log retention are not. Auth uses Supabase Auth ([ADR 0006](adr/0006-supabase-auth.md), proposed; §3.1). Owner: `netlify-engineer`. Goal: a secure, low-cost architecture with a static frontend and Netlify Functions.
 
 ## 1. Platform facts that shape the design
 
@@ -33,11 +33,15 @@ Other facts:
                 ┌──────────────────────────── Browser (PWA) ───────────────────────────┐
                 │  Static app (Vite + React/TS)    Service worker   IndexedDB (saved)  │
                 │  Filters, sorting, band colors computed locally from API data        │
-                └───────────────┬──────────────────────────────────────────────────────┘
-                                │ HTTPS (same origin /api/*)
+                │  supabase-js (publishable key): sign-in, Google PKCE, MFA, refresh   │
+                └───────────────┬─────────────────────────────────────────┬────────────┘
+                                │ HTTPS (same origin /api/*)              │ HTTPS
+                                │ Authorization: Bearer <access token>    ▼
+                                │                               Supabase Auth + Postgres
+                                │                               (auth.users, public.profiles)
 ┌───────────────────────────────▼───────────────────────── Netlify ────────────────────────────┐
+│ Every protected function: getClaims() (local ES256) → read role from profiles (RLS)          │
 │ Synchronous functions (≤60 s)                     Background functions (≤15 min)             │
-│  /api/auth/*        session check                  ingest-background     poll sources        │
 │  /api/resume        upload + parse (text path)     extract-background    job requirements    │
 │  /api/jobs          list/filter (cached)           match-background      score a profile     │
 │  /api/match/:id     scores + explanation           agent-task-background long agent work     │
@@ -47,11 +51,14 @@ Other facts:
 │                                                   schedule-cleanup (daily) → retention         │
 │                                                                                                │
 │ Netlify Blobs stores: jobs, profiles, matches, proposals, tasks, audit, ratelimit, registry   │
-│ Env vars (Functions scope, secret): ANTHROPIC_API_KEY, GITHUB_TOKEN, DATA_KEY, ...            │
-└───────────┬──────────────────────────┬────────────────────────────┬──────────────────────────┘
-            │                          │                            │
-     Claude API (Messages)     GitHub REST API (one repo)     Job sources (Greenhouse, Lever,
-                                                              USAJOBS, public career pages)
+│ Env vars, secret (no scopes on Free): ANTHROPIC_API_KEY, GITHUB_TOKEN, DATA_KEY, ...          │
+│ Env vars, public: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY (Production context only)           │
+└───────────┬──────────────────────────┬────────────────────────────┬──────────────┬───────────┘
+            │                          │                            │              │
+     Claude API (Messages)     GitHub REST API (one repo)     Job sources     Supabase (role read
+                                                              (Greenhouse,    with the caller's
+                                                              Lever, USAJOBS, token; JWKS fetch,
+                                                              career pages)   cached)
 ```
 
 ## 3. Browser vs server responsibilities
@@ -66,10 +73,33 @@ Other facts:
 | Any Claude call | | ✓ only | API key must never reach the browser |
 | GitHub commits | | ✓ only | Token must never reach the browser |
 | Job ingestion | | ✓ (scheduled + background) | Long-running, rate-limited |
-| Auth decisions | | ✓ | Client claims are not trusted |
+| Sign-in, sign-out, token refresh, MFA enrol | ✓ (supabase-js, publishable key) | | Supabase Auth handles credentials; our code never sees passwords |
+| Auth decisions (token check, role, aal2, step-up) | | ✓ | Client claims are not trusted |
 | Saved opportunities | ✓ (IndexedDB, offline) | ✓ (sync to Blobs when signed in) | Offline first |
 
 Share one `@finmatch/scoring` package between browser and server. It has no I/O and no dependencies.
+
+### 3.1 Auth flow (ADR 0006, proposed)
+
+Supabase Auth is the identity provider for all users. Netlify Identity and Auth0 are not used. Full security design: [security/supabase-auth.md](security/supabase-auth.md). Screens: [design/ux/auth-flows.md](design/ux/auth-flows.md).
+
+1. **Browser ↔ Supabase Auth.** The app signs users in with supabase-js and the publishable key. Methods: email and password, or Continue with Google (`signInWithOAuth`, PKCE). The browser holds the access token and refresh token. `super_admin` users also pass a TOTP challenge, which raises the token to `aal2`.
+2. **Browser → Function.** Each `/api/*` call that needs a user sends `Authorization: Bearer <access token>`.
+3. **Function verifies the token on every request.** `getClaims()` checks the signature against the project's JWKS. With asymmetric (ES256) keys this runs locally, usually with no network call. Any error returns 401. Never trust `getSession()` on the server.
+4. **Function reads the role on every request.** It builds a Supabase client with the caller's own token and selects the caller's row in `public.profiles`. RLS allows only that row. The role is `user` or `super_admin`. It never comes from `user_metadata`.
+5. **Function enforces the rule.** Helpers in `netlify/functions/_lib/auth/` (owner: `security-expert`):
+   - `requireUser`: valid token.
+   - `requireRole("super_admin")`: Agents page, agent list, chat, proposals.
+   - `requireAal2`: `aal` claim is `aal2` for any `super_admin` route.
+   - Approve also needs step-up: the newest `amr` entry is `totp`, at most 10 minutes old (ADR 0002).
+   - A `user` gets 403. Responses carry `Cache-Control: private, no-store`.
+6. **Public routes stay public.** `/api/jobs` needs no token and stays CDN-cached. That keeps auth cost off the busiest route (ADR 0003).
+
+Naming note: Supabase `public.profiles` holds only `id`, `role` and `created_at`. The Blobs `profiles` store holds the encrypted CandidateProfile. They are different things.
+
+No Function holds a Supabase secret key (`sb_secret_...`) or the legacy `service_role` key. Promotion to `super_admin` is a manual SQL step by the project lead, and it is audited. No resume data goes to Supabase (ADR 0004).
+
+Sources (read 2026-11-25): supabase-js `getClaims` https://supabase.com/docs/reference/javascript/auth-getclaims · JWT signing keys https://supabase.com/docs/guides/auth/signing-keys · MFA https://supabase.com/docs/guides/auth/auth-mfa · API keys https://supabase.com/docs/guides/getting-started/api-keys.
 
 ## 4. Repository layout
 
@@ -148,8 +178,9 @@ Keep a storage interface (`JobRepo`, `ProfileRepo`) so the swap is local.
 2. Every push to `main` builds and deploys production. Pull requests get Deploy Previews.
 3. Build command: `npm run build` → builds web app, generates `agents-manifest.json` from `.claude/agents/*.md`, type-checks functions.
 4. Set environment variables in the Netlify UI marked "Contains secret values" (Free plan: no scopes). Use different values per deploy context. Deploy Previews get a low-budget Claude key and **no** GitHub write token (ADR 0001).
-5. Create a **build hook** only if continuous deployment is off. Build hooks accept `trigger_branch`, `trigger_title` and `clear_cache`. Store the hook URL as a secret.
-6. Node runtime: pin a version in `netlify.toml` / `package.json engines`. `unpdf` requires Node 24+; confirm Netlify's supported Node versions during the spike.
+5. Set `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` in the Netlify UI with a value for the **Production** context only (ADR 0006). Both are public by design, so they need not be marked secret. The build may expose them to the browser; they are the only values allowed a client-exposed name. Deploy Previews get no value, so previews have no login and protected Functions return 401. Never set a Supabase secret key or `service_role` key anywhere.
+6. Create a **build hook** only if continuous deployment is off. Build hooks accept `trigger_branch`, `trigger_title` and `clear_cache`. Store the hook URL as a secret.
+7. Node runtime: pin a version in `netlify.toml` / `package.json engines`. `unpdf` requires Node 24+; confirm Netlify's supported Node versions during the spike.
 
 `netlify.toml` sketch:
 
@@ -165,7 +196,8 @@ Keep a storage interface (`JobRepo`, `ProfileRepo`) so the swap is local.
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; connect-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    # connect-src must allow the Supabase project URL so supabase-js can reach Supabase Auth (ADR 0006)
+    Content-Security-Policy = "default-src 'self'; connect-src 'self' https://<project-ref>.supabase.co; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
@@ -195,7 +227,8 @@ export const config: Config = {
 2. Supported Node versions for functions (need 24+ for `unpdf`, or pin an older `unpdf`).
 3. Resolved: code-based `rateLimit` is available on all plans, including Free.
 4. Resolved: Free plan chosen (ADR 0003); no env-var scopes, so secrets stay out of client code.
-5. Netlify Identity vs Auth0 extension (see `security.md`).
+5. Resolved: auth provider is Supabase Auth (ADR 0006, proposed). Netlify Identity has no MFA and is not used; Auth0 is not used.
+6. Added Function time of the per-request `profiles` role read (one HTTPS call to Supabase). Measure credits impact against ADR 0003.
 
 ## 10. Scaling and cost
 
@@ -209,6 +242,8 @@ export const config: Config = {
 - No secret appears in the built `dist/` bundle (CI grep for key patterns).
 - All `/api/*` personal routes return `Cache-Control: private, no-store`.
 - Deploy Preview contexts cannot commit to GitHub (no token present).
+- Deploy Previews have no Supabase values, so no login works there (ADR 0006).
+- Every protected route returns 401 without a valid token and 403 for the wrong role (ADR 0006).
 - A new job ingested by the hourly schedule is visible in `/api/jobs` within 70 seconds of its write (Blobs eventual consistency + CDN TTL).
 
 ## Sources
@@ -225,3 +260,7 @@ export const config: Config = {
 - Netlify, Rate limiting. https://docs.netlify.com/manage/security/secure-access-to-sites/rate-limiting/
 - Claude API rate limits. https://platform.claude.com/docs/en/api/rate-limits
 - unpdf (Node 24+). https://github.com/unjs/unpdf
+- Supabase, supabase-js `getClaims` (read 2026-11-25). https://supabase.com/docs/reference/javascript/auth-getclaims
+- Supabase, JWT signing keys (read 2026-11-25). https://supabase.com/docs/guides/auth/signing-keys
+- Supabase, API keys (read 2026-11-25). https://supabase.com/docs/guides/getting-started/api-keys
+- Supabase, Multi-factor authentication (read 2026-11-25). https://supabase.com/docs/guides/auth/auth-mfa

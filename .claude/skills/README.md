@@ -1,6 +1,6 @@
 # Project skills
 
-54 shared skills. Each is a folder with a `SKILL.md` (Claude Code project skill, invocable as `/<name>` and loadable by Claude). Agents preload the skills they depend on through their `skills:` frontmatter; any agent can also load other skills on demand.
+56 shared skills. Each is a folder with a `SKILL.md` (Claude Code project skill, invocable as `/<name>` and loadable by Claude). Agents preload the skills they depend on through their `skills:` frontmatter; any agent can also load other skills on demand.
 
 ## Skill responsibilities
 
@@ -21,6 +21,7 @@ Every skill holds **reusable knowledge or procedure** — business rules, techni
 | Job data | `job-data-aggregation` · `greenhouse-integration` · `lever-integration` · `workday-integration` · `icims-integration` · `oracle-recruiting-cloud` · `usajobs-integration` · `job-posting-structured-data` (job-data-integration-expert) |
 | Design & accessibility | `apple-liquid-glass-design` (Sable) · `apple-hig` · `ux-writing` (Wren) · `accessibility-wcag` (accessibility-specialist) |
 | Security | `security-architecture` · `authentication` · `authorization` · `rate-limiting` · `secrets-management` · `prompt-injection-defense` · `audit-logging` (security-expert) |
+| Supabase auth | `supabase-auth` · `supabase-row-level-security` (supabase-auth-engineer) |
 | Privacy & compliance | `privacy-and-data-protection` · `source-terms-review` · `fairness-in-hiring` (privacy-compliance-specialist) |
 | Testing | `testing-strategy` · `end-to-end-testing` (qa-engineer) |
 

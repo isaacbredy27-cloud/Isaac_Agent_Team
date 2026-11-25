@@ -19,8 +19,12 @@ Finance Match Orlando is an installable web app (PWA) on Netlify. Users upload a
 | 9 | [security.md](security.md) | Auth, roles, secrets, allow-lists, injection, retention |
 | 10 | [long-running-jobs.md](long-running-jobs.md) | Background work, queue, retries, progress |
 | 11 | [testing-and-accessibility.md](testing-and-accessibility.md) | Test plan, WCAG 2.2 AA, performance budgets |
-| 12 | [expert-roster.md](expert-roster.md) | The 17-agent team: roles, skills matrix, RACI, escalation, agent lifecycle, standards, final architecture |
-| 13 | [adr/](adr/README.md) | Binding architecture decisions (ADRs 0001–0005) |
+| 12 | [expert-roster.md](expert-roster.md) | The 18-agent team: roles, skills matrix, RACI, escalation, agent lifecycle, standards, final architecture |
+| 13 | [adr/](adr/README.md) | Binding architecture decisions (ADRs 0001–0005 accepted; 0006 proposed) |
+| 14 | [plans/](plans/README.md) | Phase plans and task briefs, for example [plans/supabase-auth.md](plans/supabase-auth.md) |
+| 15 | [design/ux/auth-flows.md](design/ux/auth-flows.md) | Sign-up, log-in, password reset, Google and MFA screens and copy |
+| 16 | [privacy/supabase-auth.md](privacy/supabase-auth.md) | What Supabase Auth holds, retention, deletion, no resume data |
+| 17 | [security/supabase-auth.md](security/supabase-auth.md) | Supabase Auth threat model, token and role checks, MFA, step-up (being drafted by `security-expert`) |
 
 ## Architecture decisions
 
@@ -32,7 +36,7 @@ Finance Match Orlando is an installable web app (PWA) on Netlify. Users upload a
 6. **Job data from official APIs first** (Greenhouse, Lever, SmartRecruiters, Ashby, USAJOBS), then public JSON-LD on career pages. No LinkedIn/Indeed/Glassdoor scraping.
 7. **Scheduled → background fan-out** for ingestion. Blob-backed task queue with leases and checkpoints. (`long-running-jobs.md`)
 8. **Agent changes need human approval, then commit directly to `main`.** Fine-grained GitHub token, one repo, Contents write only. Path allow-list. Atomic commit via Git Data API. Netlify redeploys on push. (`agent-console.md`, ADR 0001, ADR 0002)
-9. **MFA for admins.** Auth0 extension recommended for admin accounts. (`security.md`)
+9. **Supabase Auth for all users** (proposed, ADR 0006). Email and password, plus Continue with Google (PKCE). Roles live in `public.profiles`: `user` (default) or `super_admin`. Only `super_admin` with MFA (aal2) uses the Agent Console; Approve also needs step-up. Every Function verifies the token and reads the role on every request. Only the publishable key is used; never a secret key. (`adr/0006-supabase-auth.md`, `security/supabase-auth.md`)
 10. **PWA first; Capacitor later** only if store presence or native features become requirements. (`pwa-requirements.md`)
 11. **Netlify Free plan** until limits are exceeded (ADR 0003). **Resumes never public, matching only** (ADR 0004).
 
@@ -48,6 +52,7 @@ Finance Match Orlando is an installable web app (PWA) on Netlify. Users upload a
 | Claude Opus 5.5 Tier 1 limits | 4,000 RPM; 2M ITPM; 400k OTPM | Claude docs |
 | GitHub PAT limits | 5,000 req/h; 80 writes/min | GitHub docs |
 | WCAG 2.5.8 minimum target | 24×24 CSS px (we use 44×44) | W3C |
+| Supabase Free plan | 50,000 MAU; pauses after 1 week inactive; built-in email 2/hour | Supabase pricing and password docs (read 2026-11-25) |
 
 ## Implementation plan for the agent team
 
@@ -57,8 +62,16 @@ Suggested agents (create in `.claude/agents/`): `product-lead`, `frontend-engine
 
 - Monorepo skeleton (`apps/web`, `netlify/functions`, `packages/*`, `data/taxonomy`).
 - `netlify.toml`, security headers, CI (lint, typecheck, Vitest, secret scan).
-- Spikes: streaming duration, Node version for `unpdf`, plan features (rate limits, env scopes), auth provider.
+- Spikes: streaming duration, Node version for `unpdf`, plan features (rate limits, env scopes), added Function time of the per-request role lookup (ADR 0006).
 - Owner: functions-engineer, security-reviewer.
+
+Auth tasks (ADR 0006, [plans/supabase-auth.md](plans/supabase-auth.md)):
+
+| Task | Owner |
+|---|---|
+| Create Supabase project; enable asymmetric signing keys; set redirect allow-list; Google Cloud OAuth client | project lead, with supabase-auth-engineer |
+| `profiles` table, trigger and RLS as a reviewed migration under `supabase/` | supabase-auth-engineer |
+| `requireUser` / `requireRole` / `requireAal2` helpers in `netlify/functions/_lib/auth/` | security-expert |
 
 ### Phase 1 — Core matching (weeks 2–4)
 
@@ -67,6 +80,7 @@ Suggested agents (create in `.claude/agents/`): `product-lead`, `frontend-engine
 - Resume upload + parse + profile review screen.
 - Greenhouse, Lever and USAJOBS connectors; scheduled ingestion; requirement extraction.
 - Matches list, filters, job detail with score bars and template explanations.
+- Sign up, log in, log out, forgot and update password, Continue with Google screens (owners: supabase-auth-engineer, mobile-pwa-expert).
 - Owners: scoring-engineer, data-sources-engineer, frontend-engineer.
 
 ### Phase 2 — Explanations, PWA, saved jobs (weeks 5–6)
@@ -82,7 +96,13 @@ Suggested agents (create in `.claude/agents/`): `product-lead`, `frontend-engine
 - Agent manifest build step; console UI; streaming chat.
 - `propose_change` tool, validation, diff review, step-up approval, Git Data API commit, deploy status.
 - Audit log viewer.
+- `super_admin` gate on the Agents page, chat and Approve; MFA enrol and challenge; step-up (owners: agent-console-engineer, supabase-auth-engineer).
+- Promotion runbook and audit (owners: security-expert, netlify-engineer).
 - Owners: functions-engineer, security-reviewer.
+
+### All phases
+
+- Auth tests in CI: 401 without token, 403 for `user`, 403 without aal2, 403 on stale step-up, RLS denies reading another row, RLS denies role update (owner: qa-engineer).
 
 ### Phase 4 — Coverage and hardening (weeks 9–10)
 
@@ -99,10 +119,11 @@ Suggested agents (create in `.claude/agents/`): `product-lead`, `frontend-engine
 | Deploy and operate on the Netlify Free plan unless limits are exceeded | [ADR 0003](adr/0003-netlify-free-plan.md) |
 | Resumes are never public and are used only for matching | [ADR 0004](adr/0004-resume-confidentiality.md) |
 | Orchestrator hub, skills-first agents, per-agent knowledge | [ADR 0005](adr/0005-agent-ecosystem.md) |
+| Supabase Auth with `user` / `super_admin` roles in `profiles` (**Proposed**, awaiting project lead) | [ADR 0006](adr/0006-supabase-auth.md) |
 
 ## Open decisions for the owner
 
-1. **Auth provider:** Auth0 (MFA) for admins only, or for all users? (MFA for admins is required either way.)
+1. ~~**Auth provider.**~~ Closed 2026-11-25: Supabase Auth for all users ([ADR 0006](adr/0006-supabase-auth.md), awaiting approval). Follow-ups for the lead: account-deletion path without a secret key, and moving employer-registry management to `super_admin` ([plans/supabase-auth.md](plans/supabase-auth.md), open questions).
 2. **Model cost lever:** keep `claude-opus-5-5` (default) for extraction, or approve an eval to test `claude-haiku-5-5`?
 3. **Aggregator licence:** pay for a licensed jobs feed for Workday/Oracle employers, or rely on JSON-LD pages?
 4. **Push notifications:** phase 2 or later?
@@ -111,13 +132,15 @@ Suggested agents (create in `.claude/agents/`): `product-lead`, `frontend-engine
 
 - Official docs were read on 2026-11-24 through a web scraping service because the build container's network blocked several hosts directly.
 - Some pages could not be fully read: Adzuna developer overview, O*NET occupation summary, and parts of the USAJOBS header requirements. Those items are flagged "verify during build".
-- Netlify Identity's status comes from a community forum summary of a Netlify blog edit, not a Netlify staff post.
+- Netlify Identity's status comes from a community forum summary of a Netlify blog edit, not a Netlify staff post. Identity is no longer a candidate (ADR 0006).
+- Supabase pages were read on 2026-11-25 through a scraping service. Items still to verify: the `aud` claim value, identity-linking rules, and self-service account deletion without a secret key.
 - Market data mixes official BLS statistics with a one-day sample of live postings. The posting sample is evidence of who hires, not a complete census.
 
 ## Sources (primary)
 
 - MDN Progressive Web Apps guides — https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps
 - Netlify docs: Functions configuration, Background, Scheduled, Blobs, Environment variables, Build hooks, Rate limiting, Identity — https://docs.netlify.com/
+- Supabase docs: Auth, API keys, JWT signing keys, MFA, row level security, pricing (read 2026-11-25) — https://supabase.com/docs/guides/auth and https://supabase.com/pricing
 - Claude API docs: rate limits, PDF support, streaming, tool use, structured outputs — https://platform.claude.com/docs/
 - GitHub REST docs: repository contents, Git trees, rate limits, fine-grained PATs — https://docs.github.com/en/rest
 - Greenhouse Job Board API — https://developers.greenhouse.io/job-board.html
