@@ -1,0 +1,42 @@
+{
+  "name": "finance-match-orlando",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "netlify dev",
+    "dev:web": "vite --config apps/web/vite.config.ts",
+    "build:manifest": "node scripts/build-agent-manifest.mjs",
+    "build": "npm run build:manifest && vite build --config apps/web/vite.config.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "e2e": "playwright test --trace off",
+    "validate:agents": "node scripts/validate-agents.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.68.0",
+    "@netlify/blobs": "^10.0.0",
+    "@netlify/functions": "^4.0.0",
+    "@supabase/supabase-js": "^2.80.0",
+    "diff": "^8.0.0",
+    "mammoth": "^1.11.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-router-dom": "^7.9.0",
+    "unpdf": "^1.3.0",
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.0",
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "@vitest/coverage-v8": "^3.2.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.1.0",
+    "vitest": "^3.2.0"
+  }
+}
