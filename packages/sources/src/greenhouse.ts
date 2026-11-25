@@ -1,4 +1,5 @@
-import type { Job } from "../../schemas/src/index.ts";
+import type { Job } from "../../schemas/src/index";
+import taxonomy from "../../../data/taxonomy/skills.v1.json";
 
 // Notes: knowledge/job-data-integration-expert/docs/greenhouse-job-board-api.md
 // Public GET, no auth. Poll at most once per 2 hours per board (ADR 0003).
@@ -25,12 +26,13 @@ const ORLANDO_MSA =
 const FINANCE_TITLE =
   /\b(accountant|accounting|accounts (payable|receivable)|financial|finance|fp&a|controller|auditor|audit|treasury|tax|payroll|credit|underwrit\w*|budget|billing|collections|revenue|fund|investment|actuar\w*|bsa|aml)\b/i;
 
-const SKILL_KEYWORDS = [
-  "GAAP", "FP&A", "Excel", "SQL", "Power BI", "NetSuite", "SAP", "Oracle", "CPA", "CFA",
-  "Financial Modeling", "Forecasting", "Budgeting", "Variance Analysis", "Month-End Close",
-  "Account Reconciliation", "Accounts Payable", "Accounts Receivable", "Internal Audit", "SOX",
-  "Underwriting", "Credit Analysis", "Treasury", "Payroll", "Tax Preparation", "SEC Reporting",
-];
+type TaxSkill = { id: string; label: string; aliases: string[] };
+const SKILLS = (taxonomy as { skills: TaxSkill[] }).skills;
+// Whole-word match on taxonomy aliases (data/taxonomy/skills.v1.json); returns skill ids.
+const SKILL_MATCHERS = SKILLS.map((s) => ({
+  id: s.id,
+  re: new RegExp(`(?<![a-z0-9])(${[s.label, ...s.aliases].map((a) => a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})(?![a-z0-9])`, "i"),
+}));
 
 const unescapeHtml = (s: string) =>
   s.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, "&");
@@ -53,8 +55,7 @@ export function isFinanceTitle(title: string): boolean {
 }
 
 function extractSkills(text: string): string[] {
-  const lower = text.toLowerCase();
-  return SKILL_KEYWORDS.filter((k) => lower.includes(k.toLowerCase()));
+  return SKILL_MATCHERS.filter((m) => m.re.test(text)).map((m) => m.id);
 }
 
 /** Returns null when the posting is out of scope (not Orlando MSA / remote, or not finance). */

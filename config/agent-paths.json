@@ -1,5 +1,5 @@
 {
-  "$comment": "Owner: security-expert. Global lists for Agent Console proposals (skill agent-console). Deny wins. Agent globs narrow allow further. '**/.env*' is an extra, stricter deny for nested env files.",
+  "$comment": "Owner: security-expert. Global lists for Agent Console proposals (skill agent-console). Deny wins. Agent globs narrow allow further. '**/.env*' and '**/.env*/**' are extra, stricter denies for nested env files and folders.",
   "allow": [
     "apps/web/src/**",
     "packages/**",
@@ -17,6 +17,7 @@
     ".github/**",
     ".env*",
     "**/.env*",
+    "**/.env*/**",
     "**/*.pem",
     "**/*.key",
     "scripts/**"

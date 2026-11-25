@@ -1,4 +1,4 @@
-import type { Job } from "../../schemas/src/index.ts";
+import type { Job } from "../../schemas/src/index";
 import seedData from "../../../data/jobs/seed.json";
 
 const DAY_MS = 86_400_000;

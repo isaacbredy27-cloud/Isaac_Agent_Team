@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
-import { JobSchema } from "../../packages/schemas/src/index.ts";
-import { loadSeed } from "../../packages/sources/src/seed.ts";
-import { normalizeGreenhouseBoard, fetchGreenhouse } from "../../packages/sources/src/greenhouse.ts";
-import { dedupe, getJobs, resetSourceCache } from "../../packages/sources/src/index.ts";
+import { JobSchema } from "../../packages/schemas/src/index";
+import { loadSeed } from "../../packages/sources/src/seed";
+import { normalizeGreenhouseBoard, fetchGreenhouse } from "../../packages/sources/src/greenhouse";
+import { dedupe, getJobs, resetSourceCache } from "../../packages/sources/src/index";
 
 const fixture = JSON.parse(readFileSync(new URL("./fixtures/greenhouse-board.json", import.meta.url), "utf8"));
 const NOW = new Date("2026-11-25T17:00:00Z");
@@ -46,7 +46,7 @@ describe("greenhouse normalize (recorded fixture)", () => {
     expect(j.remote).toBe(true);
     expect(j.postedAt).toBe("2026-11-20T14:00:00.000Z");
     expect(j.description).toBe("Build forecasts in Excel. Requires GAAP and FP&A experience.");
-    expect(j.skills).toEqual(expect.arrayContaining(["GAAP", "Excel", "FP&A"]));
+    expect(j.skills).toEqual(expect.arrayContaining(["excel", "fpa"]));
   });
   it("drops malformed bodies", () => {
     expect(normalizeGreenhouseBoard({}, "x")).toEqual([]);

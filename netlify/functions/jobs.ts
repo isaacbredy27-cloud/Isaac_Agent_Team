@@ -1,6 +1,6 @@
 import type { Config, Context } from "@netlify/functions";
-import { getJobs } from "../../packages/sources/src/index.ts";
-import { error, json } from "./_lib/platform/http.ts";
+import { getJobs } from "../../packages/sources/src/index";
+import { error, json } from "./_lib/platform/http";
 
 const TWO_HOURS = 2 * 60 * 60; // ADR 0003: CDN-cache job lists, poll sources every 2 hours
 

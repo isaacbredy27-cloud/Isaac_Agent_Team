@@ -1,10 +1,10 @@
-import type { Job } from "../../schemas/src/index.ts";
+import type { Job } from "../../schemas/src/index";
 import registry from "../../../data/registry/employers.json";
-import { fetchGreenhouse } from "./greenhouse.ts";
-import { loadSeed } from "./seed.ts";
+import { fetchGreenhouse } from "./greenhouse";
+import { loadSeed } from "./seed";
 
-export { loadSeed } from "./seed.ts";
-export { fetchGreenhouse, normalizeGreenhouse, normalizeGreenhouseBoard } from "./greenhouse.ts";
+export { loadSeed } from "./seed";
+export { fetchGreenhouse, normalizeGreenhouse, normalizeGreenhouseBoard } from "./greenhouse";
 
 export type GetJobsOptions = {
   q?: string;

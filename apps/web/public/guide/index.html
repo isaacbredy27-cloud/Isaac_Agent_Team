@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guide · Finance Match Orlando</title>
+  <meta name="description" content="Step-by-step guide to set up and use Finance Match Orlando.">
+  <link rel="stylesheet" href="/guide/guide.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header>
+    <p><strong>Finance Match Orlando</strong></p>
+    <h1>Guide</h1>
+    <nav aria-label="Guide sections">
+      <ul>
+        <li><a href="#what">What it is</a></li>
+        <li><a href="#supabase">Supabase</a></li>
+        <li><a href="#netlify-env">Netlify variables</a></li>
+        <li><a href="#deploy">Deploy</a></li>
+        <li><a href="#use">Use the app</a></li>
+        <li><a href="#agents">Agents and Approve</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main">
+    <p>Follow the steps in order. Each step says what you will see when it works.</p>
+
+    <h2 id="what">1. What the app is</h2>
+    <p>Finance Match Orlando helps you find finance jobs in the Orlando area. You upload a resume. The app scores recent jobs against it and explains each score.</p>
+    <ul>
+      <li>Your resume is read in memory and then deleted. It is never public.</li>
+      <li>Code works out the score. The same resume and job give the same score.</li>
+      <li>Admins can chat with project agents. Changes go live only after an admin taps Approve.</li>
+    </ul>
+    <p>You can read more on the <a href="/how-it-works">How it Works</a> page.</p>
+
+    <h2 id="supabase">2. Set up Supabase</h2>
+    <p>Supabase handles sign in. You need a free Supabase account.</p>
+
+    <h3 id="sb-project">2a. Make a project</h3>
+    <ol class="steps">
+      <li>Open the <a href="https://supabase.com/dashboard" rel="noopener">Supabase dashboard</a> and pick <strong>New project</strong>.</li>
+      <li>Name it. Choose a strong database password and save it in a password manager.</li>
+      <li>Wait until the project says it is ready.</li>
+      <li>Open <strong>Project Settings</strong>, then <strong>API Keys</strong>. Copy the <strong>Project URL</strong> and the <strong>publishable key</strong>. You will paste them into Netlify in step 3.</li>
+    </ol>
+    <p class="note"><strong>Never use the secret key.</strong> This app uses the publishable key only. See <a href="https://supabase.com/docs/guides/getting-started/api-keys" rel="noopener">API keys</a>.</p>
+
+    <h3 id="sb-migration">2b. Run the migration</h3>
+    <ol class="steps">
+      <li>In the repo, find the SQL file in the <code>supabase/migrations</code> folder. It makes the <code>profiles</code> table, the sign-up trigger and the row level security rules.</li>
+      <li>In Supabase, open <strong>SQL Editor</strong> and pick <strong>New query</strong>.</li>
+      <li>Paste the whole file. Select <strong>Run</strong>.</li>
+      <li>Open <strong>Table Editor</strong>. You should see a <code>profiles</code> table.</li>
+    </ol>
+    <p>Learn more: <a href="https://supabase.com/docs/guides/database/postgres/row-level-security" rel="noopener">Row Level Security</a>.</p>
+
+    <h3 id="sb-google">2c. Turn on the Google provider</h3>
+    <ol class="steps">
+      <li>In Supabase, open <strong>Authentication</strong>, then <strong>Sign In / Providers</strong>, then <strong>Google</strong>.</li>
+      <li>Copy the <strong>callback URL</strong> shown there. It looks like <code>https://&lt;project-ref&gt;.supabase.co/auth/v1/callback</code>.</li>
+      <li>In Google Cloud, make an OAuth client of type <strong>Web application</strong>. Add that callback URL as an authorized redirect URI.</li>
+      <li>Paste the Google client ID and client secret into the Supabase Google provider. Turn it on and save.</li>
+    </ol>
+    <p>Google has rules for how the button looks. Read the <a href="https://developers.google.com/identity/branding-guidelines" rel="noopener">branding guidelines</a>. Full steps: <a href="https://supabase.com/docs/guides/auth/social-sign-in/auth-google" rel="noopener">Login with Google</a>.</p>
+    <p class="note"><strong>Keep it private.</strong> The Google client secret goes only in Supabase. Never put it in this repo or in Netlify.</p>
+
+    <h3 id="sb-redirect">2d. Add redirect URLs</h3>
+    <ol class="steps">
+      <li>Open <strong>Authentication</strong>, then <strong>URL Configuration</strong>.</li>
+      <li>Set <strong>Site URL</strong> to your live site, for example <code>https://your-site.netlify.app</code>.</li>
+      <li>Under <strong>Redirect URLs</strong>, add your live site with a wildcard path, such as <code>https://your-site.netlify.app/**</code>.</li>
+      <li>For local work, add <code>http://localhost:8888/**</code>.</li>
+    </ol>
+    <p>Learn more: <a href="https://supabase.com/docs/guides/auth/redirect-urls" rel="noopener">Redirect URLs</a>.</p>
+
+    <h3 id="sb-admin">2e. Make yourself super_admin</h3>
+    <ol class="steps">
+      <li>Open the live app. Choose <strong>Create account</strong> or <strong>Continue with Google</strong>. Finish sign up and confirm your email.</li>
+      <li>In Supabase, open <strong>SQL Editor</strong>. Run this, with your own email:</li>
+    </ol>
+<pre><code>update public.profiles
+set role = 'super_admin'
+where id = (select id from auth.users where email = 'you@example.com');</code></pre>
+    <ol class="steps" start="3">
+      <li>Open <strong>Table Editor</strong>, then <code>profiles</code>. Your row should show <code>super_admin</code>.</li>
+    </ol>
+    <p class="note"><strong>Check the column name.</strong> The migration file is the source of truth. If its column is not called <code>role</code>, use the name in the file.</p>
+
+    <h3 id="sb-mfa">2f. Enrol MFA</h3>
+    <p>Admins must use an authenticator app. You do this once.</p>
+    <ol class="steps">
+      <li>Log in to the app. You will see <strong>Set up your authenticator app</strong>.</li>
+      <li>Open an authenticator app on your phone. Scan the QR code. If you can't scan, type the text code.</li>
+      <li>Enter the 6-digit code and select <strong>Verify and turn on</strong>.</li>
+      <li>You will see <strong>Your authenticator is on</strong>. Select <strong>Continue</strong>.</li>
+    </ol>
+    <p class="note"><strong>Keep your phone safe.</strong> If you lose it, you must reset your factor in the Supabase dashboard. Learn more: <a href="https://supabase.com/docs/guides/auth/auth-mfa" rel="noopener">Multi-factor authentication</a>.</p>
+
+    <h2 id="netlify-env">3. Set Netlify environment variables</h2>
+    <p>Set these in the Netlify dashboard, under <strong>Site configuration</strong>, then <strong>Environment variables</strong>. Learn more: <a href="https://docs.netlify.com/build/environment-variables/overview/" rel="noopener">Environment variables</a>.</p>
+    <div class="table-wrap">
+      <table>
+        <caption class="skip-caption">Environment variables</caption>
+        <thead>
+          <tr><th scope="col">Name</th><th scope="col">What to put</th><th scope="col">Public?</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row"><code>VITE_SUPABASE_URL</code></th><td>Supabase Project URL</td><td>Yes. Safe for the browser.</td></tr>
+          <tr><th scope="row"><code>VITE_SUPABASE_PUBLISHABLE_KEY</code></th><td>Supabase publishable key</td><td>Yes. Safe for the browser.</td></tr>
+          <tr><th scope="row"><code>SUPABASE_URL</code></th><td>Same Project URL, for functions</td><td>No</td></tr>
+          <tr><th scope="row"><code>SUPABASE_PUBLISHABLE_KEY</code></th><td>Same publishable key, for functions</td><td>No</td></tr>
+          <tr><th scope="row"><code>ANTHROPIC_API_KEY</code></th><td>Your Claude API key</td><td>Never public</td></tr>
+          <tr><th scope="row"><code>GITHUB_TOKEN</code></th><td>Fine-grained token (see below)</td><td>Never public</td></tr>
+          <tr><th scope="row"><code>GITHUB_REPO</code></th><td><code>isaacbredy27-cloud/Isaac_Agent_Team</code></td><td>No</td></tr>
+          <tr><th scope="row"><code>JOBS_GREENHOUSE</code></th><td><code>1</code> to add live Greenhouse jobs. Leave out to use sample jobs only.</td><td>No</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 id="token">Make the GitHub token</h3>
+    <ol class="steps">
+      <li>In GitHub, open <strong>Settings</strong>, <strong>Developer settings</strong>, <strong>Personal access tokens</strong>, then <strong>Fine-grained tokens</strong>.</li>
+      <li>Choose <strong>Only select repositories</strong>. Pick this repo only.</li>
+      <li>Under <strong>Repository permissions</strong>, set <strong>Contents</strong> to <strong>Read and write</strong>. Add nothing else.</li>
+      <li>Set the expiry to 90 days. Copy the token once.</li>
+      <li>In Netlify, add <code>GITHUB_TOKEN</code> for the <strong>Production</strong> context only. Never for Deploy Previews.</li>
+    </ol>
+    <p>Put a reminder in your calendar for day 80. Learn more: <a href="https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens" rel="noopener">fine-grained tokens</a>.</p>
+    <p class="note"><strong>Rule.</strong> Names that start with <code>VITE_</code> reach the browser. Only the two Supabase values above use that prefix. Never give a secret that prefix.</p>
+
+    <h2 id="deploy">4. Connect the repo and deploy</h2>
+    <ol class="steps">
+      <li>In Netlify, choose <strong>Add new project</strong>, then <strong>Import an existing project</strong>.</li>
+      <li>Pick <strong>GitHub</strong> and choose the <code>Isaac_Agent_Team</code> repo.</li>
+      <li>Set the branch to <code>main</code>. Netlify reads the build settings from <code>netlify.toml</code>. The build command is <code>npm run build</code>. The publish folder is <code>apps/web/dist</code>.</li>
+      <li>Add the variables from step 3. Select <strong>Deploy</strong>.</li>
+      <li>When the deploy says <strong>Published</strong>, open the site. You should see the upload screen.</li>
+      <li>Go back to Supabase step 2d and make sure your live URL is in the list.</li>
+    </ol>
+    <p>Every push to <code>main</code> deploys again. The Free plan has 300 credits a month. Overage pauses every project, so check your usage each week. Learn more: <a href="https://docs.netlify.com/build/functions/get-started/" rel="noopener">Netlify Functions</a>.</p>
+
+    <h2 id="use">5. Use the app</h2>
+    <ol class="steps">
+      <li><strong>Upload.</strong> Open <strong>Resume</strong>. Choose a PDF or Word file up to 5 MB. You can paste text instead.</li>
+      <li><strong>Check.</strong> Fix any skill or title we guessed wrong.</li>
+      <li><strong>Browse.</strong> Open <strong>Jobs</strong>. Each job shows a score and a level: Strong, Moderate or Weak.</li>
+      <li><strong>Read why.</strong> Select a job. You see what matches, what is missing and what to do next.</li>
+      <li><strong>Close gaps.</strong> Open <strong>Gaps</strong> to see skills worth learning.</li>
+      <li><strong>Apply.</strong> Select <strong>Apply on the employer site</strong>. It opens in a new tab.</li>
+    </ol>
+    <p>Your first match should show up in about a minute.</p>
+
+    <h2 id="agents">6. Use the Agents page and Approve</h2>
+    <p>Only a super_admin with MFA sees the <strong>Agents</strong> tab.</p>
+    <ol class="steps">
+      <li>Log in. Enter your 6-digit code when asked.</li>
+      <li>Open <strong>Agents</strong>. Pick an agent from the list.</li>
+      <li>Type what you want. For example, ask the UX agent to improve a message.</li>
+      <li>If the agent proposes a change, select <strong>Review proposal</strong>.</li>
+      <li>Read the <strong>Why</strong> and the <strong>Changes</strong>. Green lines are added. Red lines are removed.</li>
+      <li>Select <strong>Reject</strong> to throw it away. Nothing changes.</li>
+      <li>Select <strong>Approve</strong> to save it. A sheet asks <strong>Confirm it's you</strong>. Enter your password and your 6-digit code. Select <strong>Confirm and approve</strong>.</li>
+      <li>You will see <strong>Approved. Saved as</strong> and a short commit ID. Netlify deploys the change in a few minutes.</li>
+    </ol>
+    <p class="note"><strong>Good to know.</strong> Approve saves straight to <code>main</code>. If the code changed since the proposal, you see a message and nothing is saved. Ask the agent to update it. Use <strong>Undo this change</strong> to revert an approved change.</p>
+    <p><a class="app-link" href="/">Open the app</a></p>
+  </main>
+
+  <footer>
+    <nav aria-label="More">
+      <ul>
+        <li><a href="/how-it-works">How it Works</a></li>
+        <li><a href="/resources">Resources</a></li>
+        <li><a href="https://github.com/isaacbredy27-cloud/Isaac_Agent_Team" rel="noopener">Source code</a></li>
+      </ul>
+    </nav>
+    <p>Your resume stays private. We use it only to match you with jobs.</p>
+  </footer>
+</body>
+</html>
