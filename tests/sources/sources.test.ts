@@ -98,3 +98,51 @@ describe("getJobs", () => {
     expect(out[0]!.source).toBe("greenhouse");
   });
 });
+
+describe("hardening", () => {
+  const base = fixture.jobs.find((j: { title: string }) => j.title === "Senior Financial Analyst");
+  const mk = (over: Record<string, unknown>) => ({ jobs: [{ ...base, ...over }] });
+  it("drops javascript: and non-https urls", () => {
+    expect(normalizeGreenhouseBoard(mk({ absolute_url: "javascript:alert(1)" }), "x")).toEqual([]);
+    expect(normalizeGreenhouseBoard(mk({ absolute_url: "http://a.example/j" }), "x")).toEqual([]);
+  });
+  it("drops items failing the schema", () => {
+    expect(normalizeGreenhouseBoard(mk({ id: { a: 1 } }), "x")).toEqual([]);
+    expect(normalizeGreenhouseBoard({ jobs: [null, 5] }, "x")).toEqual([]);
+  });
+  it("rejects redirects, bad tokens and oversize bodies", async () => {
+    const f = vi.fn(async () => new Response(JSON.stringify(fixture), { status: 200 }));
+    await fetchGreenhouse("exampleco", f as unknown as typeof fetch);
+    expect((f.mock.calls[0] as unknown[])[1]).toMatchObject({ redirect: "error" });
+    const boom = vi.fn(async () => { throw new TypeError("redirect"); });
+    await expect(fetchGreenhouse("exampleco", boom as unknown as typeof fetch)).rejects.toThrow();
+    for (const t of ["Bad", "a/b", "", "a".repeat(65), "x?y"]) {
+      const g = vi.fn();
+      await expect(fetchGreenhouse(t, g as unknown as typeof fetch)).rejects.toThrow("greenhouse_bad_token");
+      expect(g).not.toHaveBeenCalled();
+    }
+    const big = vi.fn(async () => new Response("{}", { status: 200, headers: { "content-length": "6000000" } }));
+    await expect(fetchGreenhouse("x", big as unknown as typeof fetch)).rejects.toThrow("greenhouse_too_large");
+    const stream = new ReadableStream({ pull(c) { c.enqueue(new Uint8Array(1024 * 1024)); } });
+    const s = vi.fn(async () => new Response(stream, { status: 200 }));
+    await expect(fetchGreenhouse("x", s as unknown as typeof fetch)).rejects.toThrow("greenhouse_too_large");
+  });
+  it("caps description length", () => {
+    const j = normalizeGreenhouseBoard(mk({ content: "a".repeat(50_000) }), "x");
+    expect(j[0]!.description.length).toBe(20_000);
+  });
+});
+
+describe("GET /api/jobs validation", () => {
+  const call = async (qs: string) => {
+    const h = (await import("../../netlify/functions/jobs")).default;
+    return h(new Request(`https://x.test/api/jobs${qs}`), {} as never);
+  };
+  it("400s on bad q or since", async () => {
+    for (const qs of ["?q=" + "a".repeat(101), "?q=%3Cscript%3E", "?since=yesterday", "?since=2026-13-45", "?since=2026-11-20T00:00:00Z"])
+      expect((await call(qs)).status).toBe(400);
+  });
+  it("accepts good params", async () => {
+    expect((await call("?q=FP%26A%20analyst&since=2026-11-01")).status).toBe(200);
+  });
+});

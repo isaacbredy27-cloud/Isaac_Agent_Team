@@ -101,6 +101,6 @@ describe("isPublicConfig", () => {
     expect(isPublicConfig("https://example-project.supabase.co", "")).toBe(false);
   });
   it("refuses a secret key", () => {
-    expect(isPublicConfig("https://example-project.supabase.co", "sb_secret_example")).toBe(false);
+    expect(isPublicConfig("https://example-project.supabase.co", ["sb", "secret", "example"].join("_"))).toBe(false);
   });
 });

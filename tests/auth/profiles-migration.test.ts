@@ -48,8 +48,8 @@ describe("auth client code", () => {
   it("contains no secret key or service_role", () => {
     for (const f of files) {
       const text = readFileSync(f, "utf8");
-      // The only allowed mentions are the guard that refuses such a key and the docs that ban it.
-      const stripped = text.replace(/startsWith\("sb_secret_"\)/g, "").replace(/`sb_secret_\.\.\.`/g, "");
+      // Docs may name the prefix (`sb_secret_...`); a real-looking key never appears.
+      const stripped = text;
       expect(stripped, f).not.toMatch(/sb_secret_[A-Za-z0-9]/);
       expect(text, f).not.toMatch(/service_role_key|SUPABASE_SERVICE_ROLE/i);
     }

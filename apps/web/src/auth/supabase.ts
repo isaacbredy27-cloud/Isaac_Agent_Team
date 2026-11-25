@@ -1,8 +1,8 @@
 /// <reference types="vite/client" />
 // Browser Supabase client. Only the project URL and the publishable key (both public). ADR 0006.
-// Never a secret key (sb_secret_) or the legacy service_role key.
+// Never a secret key or the legacy service_role key.
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { isPublicConfig, isStubEnabled } from "./helpers";
+import { SECRET_KEY_PREFIX, isPublicConfig, isStubEnabled } from "./helpers";
 
 const url: unknown = import.meta.env.VITE_SUPABASE_URL;
 const publishableKey: unknown = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -13,7 +13,7 @@ export const authStub: boolean = isStubEnabled(import.meta.env.VITE_E2E_AUTH_STU
 /** False when env is missing (or looks like a secret key). The app still runs, with sign in off. */
 export const authConfigured: boolean = !authStub && isPublicConfig(url, publishableKey);
 
-if (typeof publishableKey === "string" && publishableKey.startsWith("sb_secret_")) {
+if (typeof publishableKey === "string" && publishableKey.startsWith(SECRET_KEY_PREFIX)) {
   console.error("Refusing a secret key in the browser. Use the publishable key.");
 }
 

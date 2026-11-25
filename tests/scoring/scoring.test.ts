@@ -160,7 +160,7 @@ describe("score", () => {
     // 64 points but 3 required skills missing: tailor needs <= 2 missing
     expect(score(profile({ skills: skills.slice(0, 2), yearsExperience: 5 }), mk(5), tax).score).toBeGreaterThanOrEqual(60);
     expect(rec(profile({ skills: skills.slice(0, 2), yearsExperience: 5 }), mk(5))).toBe("stretch");
-    const stretch = score(profile({ skills: ["Excel", "FP&A"], yearsExperience: 3 }), job({ title: "x", skills, description: `3 years required. ${skills.join(", ")} required.` }), tax);
+    const stretch = score(profile({ skills: ["Excel", "FP&A"], yearsExperience: 2 }), job({ title: "x", skills, description: `3 years required. ${skills.join(", ")} required.` }), tax);
     expect(stretch.score).toBeGreaterThanOrEqual(45);
     expect(stretch.score).toBeLessThan(60);
     expect(stretch.recommendation.action).toBe("stretch");

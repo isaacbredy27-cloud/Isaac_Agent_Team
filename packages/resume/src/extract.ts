@@ -1,9 +1,12 @@
 // Validate (magic bytes, size, pages) and extract text. Never logs or keeps content (ADR 0004).
 import { extractText, getDocumentProxy } from "unpdf";
 import mammoth from "mammoth";
+import { isZipSafe } from "./zip-guard.ts";
 
 export const MAX_BYTES = 5 * 1024 * 1024;
 export const MAX_PAGES = 10;
+export const MAX_TEXT_CHARS = 200_000;
+const PDF_TIMEOUT_MS = 8_000;
 
 export type ResumeErrorCode =
   | "file_too_large"
@@ -58,24 +61,42 @@ export function detectKind(bytes: Uint8Array): FileKind {
   return "txt";
 }
 
+const cap = (t: string) => t.normalize("NFKC").slice(0, MAX_TEXT_CHARS);
+
+async function extractPdf(bytes: Uint8Array): Promise<Extracted> {
+  let pdf: Awaited<ReturnType<typeof getDocumentProxy>> | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const work = (async () => {
+      pdf = await getDocumentProxy(new Uint8Array(bytes), { isEvalSupported: false });
+      if (pdf.numPages > MAX_PAGES) throw new ResumeError("too_many_pages");
+      const { totalPages, text } = await extractText(pdf, { mergePages: false });
+      const pages = Array.isArray(text) ? text : [text];
+      return { text: cap(pages.join("\n")), pages: totalPages, kind: "pdf" as const };
+    })();
+    work.catch(() => undefined); // a late failure after the timeout must not go unhandled
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new ResumeError("unreadable_file")), PDF_TIMEOUT_MS);
+    });
+    return await Promise.race([work, timeout]);
+  } finally {
+    clearTimeout(timer);
+    await pdf?.destroy().catch(() => undefined);
+  }
+}
+
 export async function extractResumeText(input: Uint8Array): Promise<Extracted> {
   const bytes = new Uint8Array(input.buffer, input.byteOffset, input.byteLength);
   const kind = detectKind(bytes);
   try {
-    if (kind === "pdf") {
-      const pdf = await getDocumentProxy(new Uint8Array(bytes));
-      if (pdf.numPages > MAX_PAGES) throw new ResumeError("too_many_pages");
-      const { totalPages, text } = await extractText(pdf, { mergePages: false });
-      const pages = Array.isArray(text) ? text : [text];
-      return { text: pages.join("\n").normalize("NFKC"), pages: totalPages, kind };
-    }
+    if (kind === "pdf") return await extractPdf(bytes);
     if (kind === "docx") {
+      if (!isZipSafe(bytes)) throw new ResumeError("unreadable_file");
       // externalFileAccess stays off (default). Warnings are dropped: they can leak internals.
       const { value } = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
-      return { text: value.normalize("NFKC"), pages: 1, kind };
+      return { text: cap(value), pages: 1, kind };
     }
-    const text = new TextDecoder("utf-8").decode(bytes).normalize("NFKC");
-    return { text, pages: 1, kind };
+    return { text: cap(new TextDecoder("utf-8").decode(bytes)), pages: 1, kind };
   } catch (e) {
     if (e instanceof ResumeError) throw e;
     throw new ResumeError("unreadable_file");

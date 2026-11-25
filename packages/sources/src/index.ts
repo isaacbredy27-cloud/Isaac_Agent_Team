@@ -1,6 +1,6 @@
 import type { Job } from "../../schemas/src/index";
 import registry from "../../../data/registry/employers.json";
-import { fetchGreenhouse } from "./greenhouse";
+import { BOARD_TOKEN_RE, fetchGreenhouse } from "./greenhouse";
 import { loadSeed } from "./seed";
 
 export { loadSeed } from "./seed";
@@ -16,7 +16,7 @@ export type GetJobsOptions = {
 
 export type GetJobsResult = { jobs: Job[]; source: "seed" | "mixed" };
 
-type Employer = { boardToken?: string; ats?: string; tier?: number; allowed?: boolean };
+type Employer = { boardToken?: string; ats?: string; tier?: number; allowed?: boolean; termsReviewedAt?: string | null };
 
 const POLL_MS = 2 * 60 * 60 * 1000; // ADR 0003: at most once per 2 hours per board
 const cache = new Map<string, { at: number; jobs: Job[] }>();
@@ -25,10 +25,13 @@ export function resetSourceCache(): void {
   cache.clear();
 }
 
+const isDate = (d: unknown): boolean => typeof d === "string" && !Number.isNaN(Date.parse(d));
+const isToken = (t: unknown): boolean => typeof t === "string" && BOARD_TOKEN_RE.test(t);
+
 function greenhouseTokens(): string[] {
   const list = (registry as { employers?: Employer[] }).employers ?? [];
   return list
-    .filter((e) => e.ats === "greenhouse" && e.tier === 1 && e.allowed === true && e.boardToken)
+    .filter((e) => e.ats === "greenhouse" && e.tier === 1 && e.allowed === true && isDate(e.termsReviewedAt) && isToken(e.boardToken))
     .map((e) => e.boardToken as string);
 }
 
