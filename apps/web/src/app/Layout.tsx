@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GlassBar } from "../design/components";
 import { copy, siteLinks, tabBar } from "../content/copy";
 import { useAuth } from "../auth/AuthProvider";
@@ -41,7 +41,29 @@ export function Layout() {
       window.removeEventListener("offline", off);
     };
   }, []);
-  useEffect(() => window.scrollTo(0, 0), [pathname]);
+  const firstLoad = useRef(true);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (firstLoad.current) {
+      firstLoad.current = false;
+      return;
+    }
+    // After a route change: set the document title from the page h1 and move focus there (WCAG 2.4.2, 2.4.3).
+    // Wait a frame so lazy and data-driven pages can render their h1.
+    const frame = requestAnimationFrame(() => {
+      const main = document.getElementById("main");
+      const h1 = main?.querySelector("h1");
+      const name = h1?.textContent?.trim();
+      document.title = name ? `${name} · ${copy.app.name}` : copy.app.name;
+      if (h1) {
+        h1.tabIndex = -1;
+        h1.focus({ preventScroll: true });
+      } else {
+        main?.focus({ preventScroll: true });
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [pathname]);
 
   const tabs = tabBar.filter((t) => !t.superAdminOnly || role === "super_admin");
   // Only "/" needs the override: the Jobs tab points to /jobs but "/" shows the same screen.
@@ -57,30 +79,33 @@ export function Layout() {
           <Link to="/" className="text-sm text-bold">
             {copy.app.name}
           </Link>
-          <nav aria-label={copy.nav.siteLinksLabel} className="row text-sm">
+          <nav aria-label="Site" className="row text-sm">
             <SiteLinks />
           </nav>
         </div>
       </GlassBar>
       <main id="main" className="page stack-lg" tabIndex={-1}>
-        {!online && (
-          <p role="status" className="card">
-            <span aria-hidden="true">⚠ </span>
-            {copy.offline.banner}
-          </p>
-        )}
+        {/* Live region exists empty on mount so the text is announced when it fills. */}
+        <p role="status" className={online ? undefined : "card"}>
+          {online ? null : (
+            <>
+              <span aria-hidden="true">⚠ </span>
+              {copy.offline.banner}
+            </>
+          )}
+        </p>
         <InstallHint enabled={profile !== null} />
         <Outlet />
-        <footer className="stack text-sm text-secondary">
-          <p>{copy.nav.footerNote}</p>
-          <nav aria-label={copy.nav.siteLinksLabel} className="row">
-            <SiteLinks />
-            <a href={REPO} target="_blank" rel="noreferrer noopener">
-              {copy.nav.github}
-            </a>
-          </nav>
-        </footer>
       </main>
+      <footer className="page stack text-sm text-secondary">
+        <p>{copy.nav.footerNote}</p>
+        <nav aria-label="Footer" className="row">
+          <SiteLinks />
+          <a href={REPO} target="_blank" rel="noreferrer noopener">
+            {copy.nav.github}
+          </a>
+        </nav>
+      </footer>
       <GlassBar position="bottom" as="nav" aria-label={copy.nav.tabBarLabel}>
         {tabs.map((t) => (
           <NavLink

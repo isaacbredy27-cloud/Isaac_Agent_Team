@@ -102,15 +102,38 @@ export function Sheet({ open, title, onClose, detent = "medium", closeLabel = "D
   const ref = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
+  // Keep the latest onClose without re-running the effect (inline callbacks must not steal focus).
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
     const node = ref.current;
-    (node?.querySelector<HTMLElement>(FOCUSABLE) ?? node)?.focus();
+    // Focus the first form field; fall back to the first focusable element, then the dialog.
+    (node?.querySelector<HTMLElement>("input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled])") ??
+      node?.querySelector<HTMLElement>(FOCUSABLE) ??
+      node)?.focus();
+
+    // Make everything outside the sheet inert (aria-modal alone is not enough on iOS).
+    const inerted: HTMLElement[] = [];
+    let branch: HTMLElement | null = node?.parentElement ?? null; // the backdrop
+    while (branch && branch !== document.body) {
+      const parent: HTMLElement | null = branch.parentElement;
+      if (!parent) break;
+      for (const sibling of Array.from(parent.children)) {
+        if (sibling !== branch && sibling instanceof HTMLElement && !sibling.inert) {
+          sibling.inert = true;
+          inerted.push(sibling);
+        }
+      }
+      branch = parent;
+    }
+
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
-        onClose();
+        onCloseRef.current();
         return;
       }
       if (e.key !== "Tab" || !node) return;
@@ -133,9 +156,10 @@ export function Sheet({ open, title, onClose, detent = "medium", closeLabel = "D
     document.addEventListener("keydown", onKey);
     return () => {
       document.removeEventListener("keydown", onKey);
+      for (const el of inerted) el.inert = false;
       previous?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
   return (
